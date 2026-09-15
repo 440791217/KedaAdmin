@@ -153,7 +153,7 @@
 </template>
 
 <script>
-import { fetchProjectList } from '@/api/project'
+import { fetchProjectList, createProject, deleteProject } from '@/api/project'
 import Pagination from '@/components/Pagination/index.vue'
 
 export default {
@@ -235,28 +235,17 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const newProject = {
-            id: Math.floor(Math.random() * 1000) + 100,
-            projectId: this.tempForm.projectId,
-            projectName: this.tempForm.projectName,
-            manager: this.tempForm.manager,
-            jobNum: this.tempForm.jobNum,
-            subAssemblyCount: 0,
-            createTime: new Date().getTime(),
-            updateTime: new Date().getTime()
-          }
-
-          if (this.list) {
-            this.list.unshift(newProject)
-            this.total++
-          }
-
-          this.dialogFormVisible = false
-          this.$notify({
-            title: '成功',
-            message: '项目创建成功',
-            type: 'success',
-            duration: 2000
+          createProject(this.tempForm).then(() => {
+            this.dialogFormVisible = false
+            this.$notify({
+              title: '成功',
+              message: '项目创建成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.getList()
+          }).catch(err => {
+            console.error(err)
           })
         }
       })
@@ -270,11 +259,14 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.list.splice(index, 1)
-        this.total--
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        deleteProject(row.id).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.getList()
+        }).catch(err => {
+          console.error(err)
         })
       }).catch(() => {
         this.$message({

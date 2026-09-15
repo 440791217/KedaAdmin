@@ -1,32 +1,32 @@
 import request from '@/utils/request'
 
-export function fetchProjectList(query) {
+export function fetchToolList(query) {
   return request({
-    url: '/project/list',
+    url: '/tool/list',
     method: 'get',
     params: query
   })
 }
 
-export function createProject(data) {
+export function createTool(data) {
   return request({
-    url: '/project/create',
+    url: '/tool/create',
     method: 'post',
     data
   })
 }
 
-export function updateProject(data) {
+export function updateTool(data) {
   return request({
-    url: '/project/update',
+    url: '/tool/update',
     method: 'post',
     data
   })
 }
 
-export function deleteProject(id) {
+export function deleteTool(id) {
   return request({
-    url: '/project/delete',
+    url: '/tool/delete',
     method: 'post',
     params: { id }
   })

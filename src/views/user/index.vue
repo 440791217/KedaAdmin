@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="app-container">
     <div class="filter-container">
@@ -443,14 +442,13 @@
 
 <script>
 import Pagination from '@/components/Pagination/index.vue'
+import { fetchUserList, createUser, updateUser, deleteUser, updateUserStatus } from '@/api/user'
 
 export default {
   name: 'UserManagement',
-
   components: {
     Pagination
   },
-
   data() {
     const validateConfirmPassword = (rule, value, callback) => {
       if (this.dialogType === 'edit') {
@@ -547,154 +545,7 @@ export default {
             trigger: 'blur'
           }
         ]
-      },
-
-      allUsers: [
-        {
-          id: 1,
-          username: 'zhangsan',
-          realName: '张三',
-          cardNumber: 'RFID001001',
-          shiftGroup: '一班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138001',
-          createdAt: new Date('2026-08-01 08:30:00').getTime(),
-          updatedAt: new Date('2026-09-10 10:20:00').getTime()
-        },
-        {
-          id: 2,
-          username: 'lisi',
-          realName: '李四',
-          cardNumber: 'RFID001002',
-          shiftGroup: '一班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138002',
-          createdAt: new Date('2026-08-03 09:10:00').getTime(),
-          updatedAt: new Date('2026-09-08 14:30:00').getTime()
-        },
-        {
-          id: 3,
-          username: 'wangwu',
-          realName: '王五',
-          cardNumber: 'RFID001003',
-          shiftGroup: '二班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138003',
-          createdAt: new Date('2026-08-05 08:20:00').getTime(),
-          updatedAt: new Date('2026-09-09 16:10:00').getTime()
-        },
-        {
-          id: 4,
-          username: 'zhaoliu',
-          realName: '赵六',
-          cardNumber: 'RFID001004',
-          shiftGroup: '二班组',
-          avatarUrl: '',
-          status: 0,
-          phone: '13800138004',
-          createdAt: new Date('2026-08-08 10:00:00').getTime(),
-          updatedAt: new Date('2026-09-01 09:30:00').getTime()
-        },
-        {
-          id: 5,
-          username: 'qianqi',
-          realName: '钱七',
-          cardNumber: 'RFID001005',
-          shiftGroup: '三班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138005',
-          createdAt: new Date('2026-08-10 08:40:00').getTime(),
-          updatedAt: new Date('2026-09-11 11:20:00').getTime()
-        },
-        {
-          id: 6,
-          username: 'sunba',
-          realName: '孙八',
-          cardNumber: '',
-          shiftGroup: '三班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138006',
-          createdAt: new Date('2026-08-12 13:20:00').getTime(),
-          updatedAt: new Date('2026-09-05 15:20:00').getTime()
-        },
-        {
-          id: 7,
-          username: 'zhoujiu',
-          realName: '周九',
-          cardNumber: 'RFID001007',
-          shiftGroup: '维修班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138007',
-          createdAt: new Date('2026-08-15 09:30:00').getTime(),
-          updatedAt: new Date('2026-09-12 08:20:00').getTime()
-        },
-        {
-          id: 8,
-          username: 'wushi',
-          realName: '吴十',
-          cardNumber: 'RFID001008',
-          shiftGroup: '维修班组',
-          avatarUrl: '',
-          status: 2,
-          phone: '13800138008',
-          createdAt: new Date('2026-07-20 10:10:00').getTime(),
-          updatedAt: new Date('2026-08-30 17:30:00').getTime()
-        },
-        {
-          id: 9,
-          username: 'zhengwei',
-          realName: '郑伟',
-          cardNumber: 'RFID001009',
-          shiftGroup: '一班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138009',
-          createdAt: new Date('2026-08-20 08:30:00').getTime(),
-          updatedAt: new Date('2026-09-13 10:10:00').getTime()
-        },
-        {
-          id: 10,
-          username: 'chenhao',
-          realName: '陈浩',
-          cardNumber: 'RFID001010',
-          shiftGroup: '二班组',
-          avatarUrl: '',
-          status: 0,
-          phone: '13800138010',
-          createdAt: new Date('2026-08-22 11:20:00').getTime(),
-          updatedAt: new Date('2026-09-02 13:40:00').getTime()
-        },
-        {
-          id: 11,
-          username: 'yangjun',
-          realName: '杨军',
-          cardNumber: 'RFID001011',
-          shiftGroup: '三班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138011',
-          createdAt: new Date('2026-08-25 08:50:00').getTime(),
-          updatedAt: new Date('2026-09-13 14:20:00').getTime()
-        },
-        {
-          id: 12,
-          username: 'huangchao',
-          realName: '黄超',
-          cardNumber: '',
-          shiftGroup: '维修班组',
-          avatarUrl: '',
-          status: 1,
-          phone: '13800138012',
-          createdAt: new Date('2026-08-28 09:10:00').getTime(),
-          updatedAt: new Date('2026-09-12 16:40:00').getTime()
-        }
-      ]
+      }
     }
   },
 
@@ -705,51 +556,14 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-
-      setTimeout(() => {
-        let data = [...this.allUsers]
-
-        if (this.listQuery.username) {
-          data = data.filter(item =>
-            item.username
-              .toLowerCase()
-              .includes(this.listQuery.username.toLowerCase())
-          )
-        }
-
-        if (this.listQuery.realName) {
-          data = data.filter(item =>
-            item.realName.includes(this.listQuery.realName)
-          )
-        }
-
-        if (this.listQuery.cardNumber) {
-          data = data.filter(item =>
-            item.cardNumber.includes(this.listQuery.cardNumber)
-          )
-        }
-
-        if (this.listQuery.shiftGroup) {
-          data = data.filter(item =>
-            item.shiftGroup === this.listQuery.shiftGroup
-          )
-        }
-
-        if (this.listQuery.status !== '') {
-          data = data.filter(item =>
-            item.status === this.listQuery.status
-          )
-        }
-
-        this.total = data.length
-
-        const start =
-          (this.listQuery.page - 1) * this.listQuery.limit
-        const end = start + this.listQuery.limit
-
-        this.list = data.slice(start, end)
+      fetchUserList(this.listQuery).then(response => {
+        this.list = response.data.items
+        this.total = response.data.total
         this.listLoading = false
-      }, 300)
+      }).catch(err => {
+        this.listLoading = false
+        console.error(err)
+      })
     },
 
     handleFilter() {
@@ -824,93 +638,24 @@ export default {
     },
 
     createUser() {
-      const usernameExists = this.allUsers.some(
-        item => item.username === this.tempForm.username
-      )
-
-      if (usernameExists) {
-        this.$message.error('登录账号已存在')
-        return
-      }
-
-      if (this.tempForm.cardNumber) {
-        const cardExists = this.allUsers.some(
-          item => item.cardNumber === this.tempForm.cardNumber
-        )
-
-        if (cardExists) {
-          this.$message.error('该工卡/RFID已绑定其他用户')
-          return
-        }
-      }
-
-      const now = Date.now()
-
-      const newUser = {
-        id: this.getNextId(),
-        username: this.tempForm.username,
-        realName: this.tempForm.realName,
-        cardNumber: this.tempForm.cardNumber,
-        shiftGroup: this.tempForm.shiftGroup,
-        avatarUrl: this.tempForm.avatarUrl,
-        status: this.tempForm.status,
-        phone: this.tempForm.phone,
-        createdAt: now,
-        updatedAt: now
-      }
-
-      this.allUsers.unshift(newUser)
-      this.dialogFormVisible = false
-      this.listQuery.page = 1
-      this.getList()
-
-      this.$message.success('用户创建成功')
+      createUser(this.tempForm).then(() => {
+        this.dialogFormVisible = false
+        this.listQuery.page = 1
+        this.getList()
+        this.$message.success('用户创建成功')
+      }).catch(err => {
+        console.error(err)
+      })
     },
 
     updateUser() {
-      const user = this.allUsers.find(
-        item => item.id === this.editUserId
-      )
-
-      if (!user) {
-        this.$message.error('用户不存在')
-        return
-      }
-
-      const cardExists = this.allUsers.some(
-        item =>
-          item.id !== this.editUserId &&
-          item.cardNumber &&
-          item.cardNumber === this.tempForm.cardNumber
-      )
-
-      if (cardExists) {
-        this.$message.error('该工卡/RFID已绑定其他用户')
-        return
-      }
-
-      user.realName = this.tempForm.realName
-      user.cardNumber = this.tempForm.cardNumber
-      user.shiftGroup = this.tempForm.shiftGroup
-      user.avatarUrl = this.tempForm.avatarUrl
-      user.status = this.tempForm.status
-      user.phone = this.tempForm.phone
-      user.updatedAt = Date.now()
-
-      this.dialogFormVisible = false
-      this.getList()
-
-      this.$message.success('用户信息修改成功')
-    },
-
-    getNextId() {
-      if (this.allUsers.length === 0) {
-        return 1
-      }
-
-      return Math.max(
-        ...this.allUsers.map(item => item.id)
-      ) + 1
+      updateUser({ ...this.tempForm, id: this.editUserId }).then(() => {
+        this.dialogFormVisible = false
+        this.getList()
+        this.$message.success('用户信息修改成功')
+      }).catch(err => {
+        console.error(err)
+      })
     },
 
     handleDialogClose() {
@@ -927,15 +672,6 @@ export default {
         Math.floor(Math.random() * 1000000)
       ).padStart(6, '0')}`
 
-      const cardExists = this.allUsers.some(
-        item => item.cardNumber === cardNumber
-      )
-
-      if (cardExists) {
-        this.handleReadCard()
-        return
-      }
-
       this.tempForm.cardNumber = cardNumber
       this.$message.success(`读取工卡成功：${cardNumber}`)
     },
@@ -950,17 +686,12 @@ export default {
           type: 'warning'
         }
       ).then(() => {
-        const user = this.allUsers.find(
-          item => item.id === row.id
-        )
-
-        if (user) {
-          user.status = 0
-          user.updatedAt = Date.now()
-        }
-
-        this.getList()
-        this.$message.success('用户已禁用')
+        updateUserStatus(row.id, 0).then(() => {
+          this.getList()
+          this.$message.success('用户已禁用')
+        }).catch(err => {
+          console.error(err)
+        })
       }).catch(() => {})
     },
 
@@ -974,17 +705,12 @@ export default {
           type: 'info'
         }
       ).then(() => {
-        const user = this.allUsers.find(
-          item => item.id === row.id
-        )
-
-        if (user) {
-          user.status = 1
-          user.updatedAt = Date.now()
-        }
-
-        this.getList()
-        this.$message.success('用户已启用')
+        updateUserStatus(row.id, 1).then(() => {
+          this.getList()
+          this.$message.success('用户已启用')
+        }).catch(err => {
+          console.error(err)
+        })
       }).catch(() => {})
     },
 
@@ -998,23 +724,19 @@ export default {
           type: 'warning'
         }
       ).then(() => {
-        const index = this.allUsers.findIndex(
-          item => item.id === row.id
-        )
+        deleteUser(row.id).then(() => {
+          if (
+            this.listQuery.page > 1 &&
+            this.list.length === 1
+          ) {
+            this.listQuery.page--
+          }
 
-        if (index !== -1) {
-          this.allUsers.splice(index, 1)
-        }
-
-        if (
-          this.listQuery.page > 1 &&
-          this.list.length === 1
-        ) {
-          this.listQuery.page--
-        }
-
-        this.getList()
-        this.$message.success('删除成功')
+          this.getList()
+          this.$message.success('删除成功')
+        }).catch(err => {
+          console.error(err)
+        })
       }).catch(() => {})
     }
   }
@@ -1103,4 +825,3 @@ export default {
   line-height: 20px;
 }
 </style>
-```

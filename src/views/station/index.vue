@@ -36,6 +36,7 @@
     </div>
 
     <el-table
+      v-loading="listLoading"
       :data="stationList"
       border
       fit
@@ -160,6 +161,8 @@
 </template>
 
 <script>
+import { fetchStationList, createStation, updateStation, deleteStation } from '@/api/station'
+
 export default {
   name: 'StationManagement',
   filters: {
@@ -174,66 +177,13 @@ export default {
   },
   data() {
     return {
+      listLoading: true,
       listQuery: {
         stationName: '',
         ipAddress: '',
         status: ''
       },
-      // 🟢 已经将原有时间字符串彻底拆开，各自独立！
-      stationList: [
-        {
-          stationId: 'ST-001',
-          stationName: '前桥机器人精密压装工位',
-          location: '西厂区A线',
-          ipAddress: '192.168.1.101',
-          managerId: 'KD-0842',
-          manager: '张兵',
-          status: '运行中',
-          createDate: '2026-03-10',
-          createClock: '08:30:00',
-          updateDate: '2026-06-15',
-          updateClock: '14:22:05'
-        },
-        {
-          stationId: 'ST-002',
-          stationName: '数字智能扭矩螺栓拧紧工位',
-          location: '西厂区A线',
-          ipAddress: '192.168.1.102',
-          managerId: 'KD-1105',
-          manager: '李四',
-          status: '运行中',
-          createDate: '2026-03-11',
-          createClock: '09:15:00',
-          updateDate: '2026-05-20',
-          updateClock: '10:11:43'
-        },
-        {
-          stationId: 'ST-003',
-          stationName: '气密性透气量综合测试工位',
-          location: '西厂区B线',
-          ipAddress: '192.168.1.120',
-          managerId: 'KD-0319',
-          manager: '王五',
-          status: '维护中',
-          createDate: '2026-04-01',
-          createClock: '11:00:00',
-          updateDate: '2026-06-19',
-          updateClock: '17:55:12'
-        },
-        {
-          stationId: 'ST-004',
-          stationName: '成品形位公差视觉出厂检测',
-          location: '南厂区C线',
-          ipAddress: '192.168.3.45',
-          managerId: 'KD-1560',
-          manager: '赵六',
-          status: '已停用',
-          createDate: '2026-05-05',
-          createClock: '16:40:00',
-          updateDate: '2026-06-01',
-          updateClock: '09:00:00'
-        }
-      ],
+      stationList: [],
       dialogFormVisible: false,
       dialogStatus: '',
       tempFormData: {
@@ -254,36 +204,29 @@ export default {
           { required: true, message: 'IP地址为必填项', trigger: 'blur' },
           { pattern: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/, message: '请输入合法的 IPv4 地址', trigger: 'blur' }
         ]
-      },
-      allStationDataBackup: []
+      }
     }
   },
   created() {
-    this.allStationDataBackup = [...this.stationList]
+    this.getList()
   },
   methods: {
-    // 💡 针对独立拆分的字段，动态生成当前日期和时间对象
-    getNowDateAndClockObjects() {
-      const now = new Date()
-      const padding = (num) => String(num).padStart(2, '0')
-      return {
-        date: `${now.getFullYear()}-${padding(now.getMonth() + 1)}-${padding(now.getDate())}`,
-        clock: `${padding(now.getHours())}:${padding(now.getMinutes())}:${padding(now.getSeconds())}`
-      }
+    getList() {
+      this.listLoading = true
+      fetchStationList(this.listQuery).then(response => {
+        this.stationList = response.data.items
+        this.listLoading = false
+      }).catch(err => {
+        this.listLoading = false
+        console.error(err)
+      })
     },
     handleFilter() {
-      this.stationList = this.allStationDataBackup.filter(item => {
-        const matchName = !this.listQuery.stationName ||
-          item.stationName.includes(this.listQuery.stationName) ||
-          item.stationId.includes(this.listQuery.stationName)
-        const matchIp = !this.listQuery.ipAddress || item.ipAddress.includes(this.listQuery.ipAddress)
-        const matchStatus = !this.listQuery.status || item.status === this.listQuery.status
-        return matchName && matchIp && matchStatus
-      })
+      this.getList()
     },
     resetQuery() {
       this.listQuery = { stationName: '', ipAddress: '', status: '' }
-      this.stationList = [...this.allStationDataBackup]
+      this.getList()
     },
     resetTempFormData() {
       this.tempFormData = {
@@ -307,22 +250,13 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const timeObj = this.getNowDateAndClockObjects()
-          const newId = 'ST-00' + (this.allStationDataBackup.length + 1)
-
-          const newStation = {
-            ...this.tempFormData,
-            stationId: newId,
-            createDate: timeObj.date,
-            createClock: timeObj.clock,
-            updateDate: timeObj.date,
-            updateClock: timeObj.clock
-          }
-
-          this.allStationDataBackup.unshift(newStation)
-          this.handleFilter()
-          this.dialogFormVisible = false
-          this.$message.success('成功创建现场新工位！')
+          createStation(this.tempFormData).then(() => {
+            this.dialogFormVisible = false
+            this.$message.success('成功创建现场新工位！')
+            this.getList()
+          }).catch(err => {
+            console.error(err)
+          })
         }
       })
     },
@@ -337,17 +271,13 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const index = this.allStationDataBackup.findIndex(v => v.stationId === this.tempFormData.stationId)
-          if (index > -1) {
-            const timeObj = this.getNowDateAndClockObjects()
-            this.tempFormData.updateDate = timeObj.date
-            this.tempFormData.updateClock = timeObj.clock
-
-            this.allStationDataBackup.splice(index, 1, this.tempFormData)
-            this.handleFilter()
-          }
-          this.dialogFormVisible = false
-          this.$message.success('工位参数修改成功')
+          updateStation(this.tempFormData).then(() => {
+            this.dialogFormVisible = false
+            this.$message.success('工位参数修改成功')
+            this.getList()
+          }).catch(err => {
+            console.error(err)
+          })
         }
       })
     },
@@ -357,12 +287,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        const backupIndex = this.allStationDataBackup.findIndex(v => v.stationId === row.stationId)
-        if (backupIndex > -1) {
-          this.allStationDataBackup.splice(backupIndex, 1)
-        }
-        this.handleFilter()
-        this.$message.success('工位删除成功')
+        deleteStation(row.stationId).then(() => {
+          this.$message.success('工位删除成功')
+          this.getList()
+        }).catch(err => {
+          console.error(err)
+        })
       }).catch(() => {})
     }
   }

@@ -1,32 +1,32 @@
 import request from '@/utils/request'
 
-export function fetchProjectList(query) {
+export function fetchStationList(query) {
   return request({
-    url: '/project/list',
+    url: '/station/list',
     method: 'get',
     params: query
   })
 }
 
-export function createProject(data) {
+export function createStation(data) {
   return request({
-    url: '/project/create',
+    url: '/station/create',
     method: 'post',
     data
   })
 }
 
-export function updateProject(data) {
+export function updateStation(data) {
   return request({
-    url: '/project/update',
+    url: '/station/update',
     method: 'post',
     data
   })
 }
 
-export function deleteProject(id) {
+export function deleteStation(id) {
   return request({
-    url: '/project/delete',
+    url: '/station/delete',
     method: 'post',
     params: { id }
   })

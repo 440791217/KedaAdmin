@@ -35,6 +35,7 @@
     </div>
 
     <el-table
+      v-loading="listLoading"
       :data="toolList"
       border
       fit
@@ -173,6 +174,9 @@
 </template>
 
 <script>
+import { fetchToolList, createTool, updateTool, deleteTool } from '@/api/tool'
+import { fetchStationList } from '@/api/station'
+
 export default {
   name: 'ToolManagement',
   filters: {
@@ -187,77 +191,14 @@ export default {
   },
   data() {
     return {
+      listLoading: true,
       listQuery: {
         toolName: '',
         boundStationId: '',
         status: ''
       },
-      // 🟢 模拟外部导入的工位大本营，用来做绑定下拉菜单的选择源
-      stationOptions: [
-        { stationId: 'ST-001', stationName: '前桥机器人精密压装工位' },
-        { stationId: 'ST-002', stationName: '数字智能扭矩螺栓拧紧工位' },
-        { stationId: 'ST-003', stationName: '气密性透气量综合测试工位' },
-        { stationId: 'ST-004', stationName: '成品形位公差视觉出厂检测' }
-      ],
-      // 🟢 工具初始化 mock 数据
-      toolList: [
-        {
-          toolId: 'TL-801',
-          toolName: '高级数字高精度定扭螺卡枪',
-          boundStationId: 'ST-002',
-          boundStationName: '数字智能扭矩螺栓拧紧工位',
-          ipAddress: '192.168.1.201',
-          managerId: 'KD-0842',
-          manager: '张兵',
-          status: '正常启用',
-          createDate: '2026-03-12',
-          createClock: '08:45:00',
-          updateDate: '2026-06-18',
-          updateClock: '10:22:00'
-        },
-        {
-          toolId: 'TL-802',
-          toolName: '工业红外激光引导对位仪',
-          boundStationId: 'ST-001',
-          boundStationName: '前桥机器人精密压装工位',
-          ipAddress: '192.168.1.202',
-          managerId: 'KD-1105',
-          manager: '李四',
-          status: '正常启用',
-          createDate: '2026-03-15',
-          createClock: '11:20:00',
-          updateDate: '2026-06-12',
-          updateClock: '09:15:30'
-        },
-        {
-          toolId: 'TL-803',
-          toolName: '差压式高灵敏度气密气体检漏仪',
-          boundStationId: 'ST-003',
-          boundStationName: '气密性透气量综合测试工位',
-          ipAddress: '192.168.1.215',
-          managerId: 'KD-0319',
-          manager: '王五',
-          status: '检测待校准',
-          createDate: '2026-04-05',
-          createClock: '14:30:00',
-          updateDate: '2026-06-20',
-          updateClock: '15:10:00'
-        },
-        {
-          toolId: 'TL-804',
-          toolName: '超高速工业双目3D视觉相机',
-          boundStationId: 'ST-004',
-          boundStationName: '成品形位公差视觉出厂检测',
-          ipAddress: '192.168.3.88',
-          managerId: 'KD-1560',
-          manager: '赵六',
-          status: '故障停用',
-          createDate: '2026-05-10',
-          createClock: '10:00:00',
-          updateDate: '2026-06-01',
-          updateClock: '16:00:00'
-        }
-      ],
+      stationOptions: [],
+      toolList: [],
       dialogFormVisible: false,
       dialogStatus: '',
       tempFormData: {
@@ -279,35 +220,37 @@ export default {
           { required: true, message: '工具IP地址为必填项', trigger: 'blur' },
           { pattern: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/, message: '请输入合法的 IPv4 地址', trigger: 'blur' }
         ]
-      },
-      allToolDataBackup: []
+      }
     }
   },
   created() {
-    this.allToolDataBackup = [...this.toolList]
+    this.getStationOptions()
+    this.getList()
   },
   methods: {
-    getNowDateAndClockObjects() {
-      const now = new Date()
-      const padding = (num) => String(num).padStart(2, '0')
-      return {
-        date: `${now.getFullYear()}-${padding(now.getMonth() + 1)}-${padding(now.getDate())}`,
-        clock: `${padding(now.getHours())}:${padding(now.getMinutes())}:${padding(now.getSeconds())}`
-      }
+    getStationOptions() {
+      fetchStationList({}).then(response => {
+        this.stationOptions = response.data.items || []
+      }).catch(err => {
+        console.error(err)
+      })
+    },
+    getList() {
+      this.listLoading = true
+      fetchToolList(this.listQuery).then(response => {
+        this.toolList = response.data.items
+        this.listLoading = false
+      }).catch(err => {
+        this.listLoading = false
+        console.error(err)
+      })
     },
     handleFilter() {
-      this.toolList = this.allToolDataBackup.filter(item => {
-        const matchName = !this.listQuery.toolName ||
-          item.toolName.includes(this.listQuery.toolName) ||
-          item.toolId.includes(this.listQuery.toolName)
-        const matchStation = !this.listQuery.boundStationId || item.boundStationId === this.listQuery.boundStationId
-        const matchStatus = !this.listQuery.status || item.status === this.listQuery.status
-        return matchName && matchStation && matchStatus
-      })
+      this.getList()
     },
     resetQuery() {
       this.listQuery = { toolName: '', boundStationId: '', status: '' }
-      this.toolList = [...this.allToolDataBackup]
+      this.getList()
     },
     resetTempFormData() {
       this.tempFormData = {
@@ -332,28 +275,17 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const timeObj = this.getNowDateAndClockObjects()
-          const newId = 'TL-8' + paddingLeft(this.allToolDataBackup.length + 1, 2)
-
-          // 根据选中的工位ID，匹配并同步出工位中文名存入列表
           const stationTarget = this.stationOptions.find(o => o.stationId === this.tempFormData.boundStationId)
           if (stationTarget) {
             this.tempFormData.boundStationName = stationTarget.stationName
           }
-
-          const newTool = {
-            ...this.tempFormData,
-            toolId: newId,
-            createDate: timeObj.date,
-            createClock: timeObj.clock,
-            updateDate: timeObj.date,
-            updateClock: timeObj.clock
-          }
-
-          this.allToolDataBackup.unshift(newTool)
-          this.handleFilter()
-          this.dialogFormVisible = false
-          this.$message.success('成功录入并绑定新生产工具！')
+          createTool(this.tempFormData).then(() => {
+            this.dialogFormVisible = false
+            this.$message.success('成功录入并绑定新生产工具！')
+            this.getList()
+          }).catch(err => {
+            console.error(err)
+          })
         }
       })
     },
@@ -368,21 +300,15 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const index = this.allToolDataBackup.findIndex(v => v.toolId === this.tempFormData.toolId)
-          if (index > -1) {
-            const timeObj = this.getNowDateAndClockObjects()
-            this.tempFormData.updateDate = timeObj.date
-            this.tempFormData.updateClock = timeObj.clock
-
-            // 同步工位中文更替
-            const stationTarget = this.stationOptions.find(o => o.stationId === this.tempFormData.boundStationId)
-            this.tempFormData.boundStationName = stationTarget ? stationTarget.stationName : ''
-
-            this.allToolDataBackup.splice(index, 1, this.tempFormData)
-            this.handleFilter()
-          }
-          this.dialogFormVisible = false
-          this.$message.success('工具配置修改成功')
+          const stationTarget = this.stationOptions.find(o => o.stationId === this.tempFormData.boundStationId)
+          this.tempFormData.boundStationName = stationTarget ? stationTarget.stationName : ''
+          updateTool(this.tempFormData).then(() => {
+            this.dialogFormVisible = false
+            this.$message.success('工具配置修改成功')
+            this.getList()
+          }).catch(err => {
+            console.error(err)
+          })
         }
       })
     },
@@ -392,20 +318,15 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        const backupIndex = this.allToolDataBackup.findIndex(v => v.toolId === row.toolId)
-        if (backupIndex > -1) {
-          this.allToolDataBackup.splice(backupIndex, 1)
-        }
-        this.handleFilter()
-        this.$message.success('工具解绑并移除成功')
+        deleteTool(row.toolId).then(() => {
+          this.$message.success('工具解绑并移除成功')
+          this.getList()
+        }).catch(err => {
+          console.error(err)
+        })
       }).catch(() => {})
     }
   }
-}
-
-// 辅助工具补零函数
-function paddingLeft(num, length) {
-  return (Array(length).join('0') + num).slice(-length)
 }
 </script>
 
