@@ -90,10 +90,22 @@ export const constantRoutes = [
     meta: { title: '用户管理' },
     children: [
       {
-        path: 'project',
+        path: 'user',
         component: () => import('@/views/user/index'),
         name: 'UserManagement', // 🟢 已由 '项目配置' 改为英文
         meta: { title: '用户管理' }
+      },
+      {
+        path: 'test',
+        component: () => import('@/views/user/insert'),
+        name: 'Test', // 🟢 已由 '项目配置' 改为英文
+        meta: { title: '测试' }
+      },
+      {
+        path: 'sop',
+        component: () => import('@/views/sop/annotation'),
+        name: 'annotation', // 🟢 已由 '项目配置' 改为英文
+        meta: { title: 'annotation' }
       }
     ]
   },
