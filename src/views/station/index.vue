@@ -3,7 +3,7 @@
     <div class="filter-container" style="margin-bottom: 20px; display: flex; justify-content: space-between; flex-wrap: wrap;">
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <el-input
-          v-model="listQuery.stationName"
+          v-model="listQuery.station_name"
           placeholder="工位名称 / ID"
           style="width: 200px;"
           size="small"
@@ -12,7 +12,7 @@
           @keyup.enter.native="handleFilter"
         />
         <el-input
-          v-model="listQuery.ipAddress"
+          v-model="listQuery.ip_address"
           placeholder="IP 地址 (如: 192.168.)"
           style="width: 200px;"
           size="small"
@@ -48,13 +48,13 @@
 
       <el-table-column label="工位ID" align="center" width="110">
         <template slot-scope="{row}">
-          <span class="code-text">{{ row.stationId }}</span>
+          <span class="code-text">{{ row.station_id }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="工位名称" align="left" min-width="160">
         <template slot-scope="{row}">
-          <span style="font-weight: bold; color: #303133;">{{ row.stationName }}</span>
+          <span style="font-weight: bold; color: #303133;">{{ row.station_name }}</span>
         </template>
       </el-table-column>
 
@@ -62,13 +62,13 @@
 
       <el-table-column label="IP 地址" align="center" width="140">
         <template slot-scope="{row}">
-          <el-tag size="small" type="info" effect="plain"><i class="el-icon-share" /> {{ row.ipAddress }}</el-tag>
+          <el-tag size="small" type="info" effect="plain"><i class="el-icon-share" /> {{ row.ip_address }}</el-tag>
         </template>
       </el-table-column>
 
       <el-table-column label="管理者ID" align="center" width="110">
         <template slot-scope="{row}">
-          <span style="font-family: monospace; color: #606266;">{{ row.managerId }}</span>
+          <span style="font-family: monospace; color: #606266;">{{ row.manager_id }}</span>
         </template>
       </el-table-column>
 
@@ -82,23 +82,17 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="创建时间" align="center" width="120">
+      <el-table-column label="创建时间" align="center" width="160">
         <template slot-scope="{row}">
-          <div class="time-column-wrap">
-            <span class="time-date">{{ row.createDate }}</span>
-            <br>
-            <span class="time-clock">{{ row.createClock }}</span>
-          </div>
+          <!-- 时间一行显示，原为两行，后续可改回 -->
+          <span>{{ row.created_at }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="最近修改时间" align="center" width="120">
+      <el-table-column label="最近修改时间" align="center" width="160">
         <template slot-scope="{row}">
-          <div class="time-column-wrap">
-            <span class="time-date">{{ row.updateDate }}</span>
-            <br>
-            <span class="time-clock">{{ row.updateClock }}</span>
-          </div>
+          <!-- 时间一行显示，原为两行，后续可改回 -->
+          <span>{{ row.updated_at }}</span>
         </template>
       </el-table-column>
 
@@ -118,8 +112,8 @@
 
     <el-dialog :title="dialogStatus === 'create' ? '✨ 新增现场工位配置' : '🛠️ 查看/修改工位参数'" :visible.sync="dialogFormVisible" width="550px">
       <el-form ref="dataForm" :model="tempFormData" :rules="rules" label-position="right" label-width="100px" style="width: 440px; margin-left:20px;">
-        <el-form-item label="工位名称" prop="stationName">
-          <el-input v-model="tempFormData.stationName" placeholder="如: 总装线-01拧紧工位" />
+        <el-form-item label="工位名称" prop="station_name">
+          <el-input v-model="tempFormData.station_name" placeholder="如: 总装线-01拧紧工位" />
         </el-form-item>
 
         <el-form-item label="物理地点" prop="location">
@@ -128,8 +122,8 @@
 
         <el-row :gutter="10">
           <el-col :span="12">
-            <el-form-item label="管理者ID" prop="managerId">
-              <el-input v-model="tempFormData.managerId" placeholder="工号" />
+            <el-form-item label="管理者ID" prop="manager_id">
+              <el-input v-model="tempFormData.manager_id" placeholder="工号" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -139,8 +133,8 @@
           </el-col>
         </el-row>
 
-        <el-form-item label="IP 地址" prop="ipAddress">
-          <el-input v-model="tempFormData.ipAddress" placeholder="如: 192.168.1.105" />
+        <el-form-item label="IP 地址" prop="ip_address">
+          <el-input v-model="tempFormData.ip_address" placeholder="如: 192.168.1.105" />
         </el-form-item>
 
         <el-form-item label="工位状态">
@@ -179,28 +173,28 @@ export default {
     return {
       listLoading: true,
       listQuery: {
-        stationName: '',
-        ipAddress: '',
+        station_name: '',
+        ip_address: '',
         status: ''
       },
       stationList: [],
       dialogFormVisible: false,
       dialogStatus: '',
       tempFormData: {
-        stationId: '',
-        stationName: '',
+        station_id: '',
+        station_name: '',
         location: '',
-        ipAddress: '',
-        managerId: '',
+        ip_address: '',
+        manager_id: '',
         manager: '',
         status: '运行中'
       },
       rules: {
-        stationName: [{ required: true, message: '工位名称为必填项', trigger: 'blur' }],
+        station_name: [{ required: true, message: '工位名称为必填项', trigger: 'blur' }],
         location: [{ required: true, message: '物理地点为必填项', trigger: 'blur' }],
-        managerId: [{ required: true, message: '管理者ID为必填项', trigger: 'blur' }],
+        manager_id: [{ required: true, message: '管理者ID为必填项', trigger: 'blur' }],
         manager: [{ required: true, message: '负责人为必填项', trigger: 'blur' }],
-        ipAddress: [
+        ip_address: [
           { required: true, message: 'IP地址为必填项', trigger: 'blur' },
           { pattern: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/, message: '请输入合法的 IPv4 地址', trigger: 'blur' }
         ]
@@ -214,27 +208,24 @@ export default {
     getList() {
       this.listLoading = true
       fetchStationList(this.listQuery).then(response => {
-        this.stationList = response.data.items
+        this.stationList = response.data.list
         this.listLoading = false
-      }).catch(err => {
-        this.listLoading = false
-        console.error(err)
       })
     },
     handleFilter() {
       this.getList()
     },
     resetQuery() {
-      this.listQuery = { stationName: '', ipAddress: '', status: '' }
+      this.listQuery = { station_name: '', ip_address: '', status: '' }
       this.getList()
     },
     resetTempFormData() {
       this.tempFormData = {
-        stationId: '',
-        stationName: '',
+        station_id: '',
+        station_name: '',
         location: '',
-        ipAddress: '',
-        managerId: '',
+        ip_address: '',
+        manager_id: '',
         manager: '',
         status: '运行中'
       }
@@ -254,8 +245,6 @@ export default {
             this.dialogFormVisible = false
             this.$message.success('成功创建现场新工位！')
             this.getList()
-          }).catch(err => {
-            console.error(err)
           })
         }
       })
@@ -271,27 +260,23 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          updateStation(this.tempFormData).then(() => {
+          updateStation(this.tempFormData.station_id, this.tempFormData).then(() => {
             this.dialogFormVisible = false
             this.$message.success('工位参数修改成功')
             this.getList()
-          }).catch(err => {
-            console.error(err)
           })
         }
       })
     },
     handleDelete(index, row) {
-      this.$confirm(`确要彻底移除工位【${row.stationName}】的配置信息吗？`, '安全警告', {
+      this.$confirm(`确要彻底移除工位【${row.station_name}】的配置信息吗？`, '安全警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteStation(row.stationId).then(() => {
+        deleteStation(row.station_id).then(() => {
           this.$message.success('工位删除成功')
           this.getList()
-        }).catch(err => {
-          console.error(err)
         })
       }).catch(() => {})
     }
@@ -321,24 +306,4 @@ export default {
   margin-left: 0 !important;
 }
 
-/* 破除 Element UI 表格禁止换行限制的强制样式 */
-.time-column-wrap {
-  display: block !important;
-  white-space: normal !important;
-  line-height: 1.4;
-  word-break: break-all;
-}
-
-.time-date {
-  font-size: 13px;
-  color: #303133;
-  font-weight: 500;
-  display: inline-block;
-}
-.time-clock {
-  font-size: 11px;
-  color: #909399;
-  font-family: monospace;
-  display: inline-block;
-}
 </style>

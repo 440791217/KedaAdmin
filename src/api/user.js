@@ -1,18 +1,10 @@
 import request from '@/utils/request'
 
-export function login(data) {
+export function login(params) {
   return request({
     url: '/user/login',
     method: 'post',
-    data
-  })
-}
-
-export function getInfo(token) {
-  return request({
-    url: '/user/info',
-    method: 'get',
-    params: { token }
+    params
   })
 }
 
@@ -23,9 +15,18 @@ export function logout() {
   })
 }
 
+// 已废弃：登录接口已一次性返回用户信息，无需单独调用
+// export function getInfo(token) {
+//   return request({
+//     url: '/user/info',
+//     method: 'get',
+//     params: { token }
+//   })
+// }
+
 export function fetchUserList(query) {
   return request({
-    url: '/user/list',
+    url: '/auth/user/list',
     method: 'get',
     params: query
   })
@@ -33,32 +34,37 @@ export function fetchUserList(query) {
 
 export function createUser(data) {
   return request({
-    url: '/user/create',
+    url: '/auth/user',
     method: 'post',
     data
   })
 }
 
-export function updateUser(data) {
+export function updateUser(userId, data) {
   return request({
-    url: '/user/update',
-    method: 'post',
+    url: `/auth/user/${userId}`,
+    method: 'put',
     data
   })
 }
 
-export function deleteUser(id) {
+export function deleteUser(userId) {
   return request({
-    url: '/user/delete',
-    method: 'post',
-    params: { id }
+    url: `/auth/user/${userId}`,
+    method: 'delete'
   })
 }
 
-export function updateUserStatus(id, status) {
+export function disableUser(userId) {
   return request({
-    url: '/user/status',
-    method: 'post',
-    params: { id, status }
+    url: `/auth/user/${userId}/disable`,
+    method: 'put'
+  })
+}
+
+export function enableUser(userId) {
+  return request({
+    url: `/auth/user/${userId}/enable`,
+    method: 'put'
   })
 }

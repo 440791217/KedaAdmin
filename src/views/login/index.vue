@@ -6,15 +6,15 @@
         <h3 class="title">SOP管理端</h3>
       </div>
 
-      <el-form-item prop="username">
+      <el-form-item prop="account">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
         <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="Username"
-          name="username"
+          ref="account"
+          v-model="loginForm.account"
+          placeholder="账号"
+          name="account"
           type="text"
           tabindex="1"
           autocomplete="on"
@@ -31,7 +31,7 @@
             ref="password"
             v-model="loginForm.password"
             :type="passwordType"
-            placeholder="Password"
+            placeholder="密码"
             name="password"
             tabindex="2"
             autocomplete="on"
@@ -45,7 +45,26 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-form-item prop="captcha_code">
+        <div class="captcha-wrapper">
+          <span class="svg-container">
+            <svg-icon icon-class="email" />
+          </span>
+          <el-input
+            v-model="loginForm.captcha_code"
+            placeholder="验证码"
+            name="captcha_code"
+            type="text"
+            tabindex="3"
+            autocomplete="off"
+          />
+          <div class="captcha-code-box" @click="refreshCaptcha" :title="'点击刷新验证码'">
+            {{ captcha_text }}
+          </div>
+        </div>
+      </el-form-item>
+
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登 录</el-button>
 
       <div style="position:relative">
         <div class="tips">
@@ -81,28 +100,39 @@ export default {
   name: 'Login',
   components: { SocialSign },
   data() {
-    const validateUsername = (rule, value, callback) => {
+    const validateAccount = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('请输入正确的账号'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('密码不能少于6位'))
+      } else {
+        callback()
+      }
+    }
+    const validateCaptcha = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入验证码'))
       } else {
         callback()
       }
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111'
+        account: 'root',
+        password: '123456',
+        captcha_code: '',
+        login_type: 'password'
       },
+      captcha_text: '8888',
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        account: [{ required: true, trigger: 'blur', validator: validateAccount }],
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+        captcha_code: [{ required: true, trigger: 'blur', validator: validateCaptcha }]
       },
       passwordType: 'password',
       capsTooltip: false,
@@ -128,8 +158,8 @@ export default {
     // window.addEventListener('storage', this.afterQRScan)
   },
   mounted() {
-    if (this.loginForm.username === '') {
-      this.$refs.username.focus()
+    if (this.loginForm.account === '') {
+      this.$refs.account.focus()
     } else if (this.loginForm.password === '') {
       this.$refs.password.focus()
     }
@@ -151,6 +181,15 @@ export default {
       this.$nextTick(() => {
         this.$refs.password.focus()
       })
+    },
+    refreshCaptcha() {
+      // 生成 4 位随机数字验证码
+      let code = ''
+      for (let i = 0; i < 4; i++) {
+        code += Math.floor(Math.random() * 10)
+      }
+      this.captcha_text = code
+      this.loginForm.captcha_code = ''
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
@@ -307,6 +346,38 @@ $light_gray:#eee;
     color: $dark_gray;
     cursor: pointer;
     user-select: none;
+  }
+
+  .captcha-wrapper {
+    position: relative;
+    width: 85%;
+
+    ::v-deep .el-input__inner {
+      padding-right: 120px !important;
+      height: 42px;
+      line-height: 42px;
+    }
+
+    .captcha-code-box {
+      position: absolute;
+      right: -66.5px;
+      top: 0;
+      bottom: 0;
+      width: 110px;
+      line-height: 40px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.08);
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 14px;
+      letter-spacing: 1px;
+      border-radius: 0 3px 3px 0;
+      cursor: pointer;
+      user-select: none;
+      font-family: Arial, sans-serif;
+      box-sizing: border-box;
+      z-index: 2;
+    }
   }
 
   .thirdparty-button {

@@ -10,24 +10,23 @@ export function fetchStationList(query) {
 
 export function createStation(data) {
   return request({
-    url: '/station/create',
+    url: '/station',
     method: 'post',
     data
   })
 }
 
-export function updateStation(data) {
+export function updateStation(stationId, data) {
   return request({
-    url: '/station/update',
-    method: 'post',
+    url: `/station/${stationId}`,
+    method: 'put',
     data
   })
 }
 
-export function deleteStation(id) {
+export function deleteStation(stationId) {
   return request({
-    url: '/station/delete',
-    method: 'post',
-    params: { id }
+    url: `/station/${stationId}`,
+    method: 'delete'
   })
 }

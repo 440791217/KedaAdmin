@@ -43,6 +43,8 @@ module.exports = {
         pathRewrite: { '^/dev-api': '' }
       }
     }
+    // 本地 mock-server（已弃用，切换到 APIFox Mock，需要时取消注释即可）
+    // before: require('./mock/mock-server.js')
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

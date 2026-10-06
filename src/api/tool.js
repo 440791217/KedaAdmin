@@ -10,24 +10,23 @@ export function fetchToolList(query) {
 
 export function createTool(data) {
   return request({
-    url: '/tool/create',
+    url: '/tool',
     method: 'post',
     data
   })
 }
 
-export function updateTool(data) {
+export function updateTool(toolId, data) {
   return request({
-    url: '/tool/update',
-    method: 'post',
+    url: `/tool/${toolId}`,
+    method: 'put',
     data
   })
 }
 
-export function deleteTool(id) {
+export function deleteTool(toolId) {
   return request({
-    url: '/tool/delete',
-    method: 'post',
-    params: { id }
+    url: `/tool/${toolId}`,
+    method: 'delete'
   })
 }

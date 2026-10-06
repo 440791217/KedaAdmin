@@ -3,7 +3,7 @@
     <div class="filter-container" style="margin-bottom: 20px; display: flex; justify-content: space-between; flex-wrap: wrap;">
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <el-input
-          v-model="listQuery.toolName"
+          v-model="listQuery.tool_name"
           placeholder="工具名称 / ID"
           style="width: 200px;"
           size="small"
@@ -11,12 +11,12 @@
           prefix-icon="el-icon-setting"
           @keyup.enter.native="handleFilter"
         />
-        <el-select v-model="listQuery.boundStationId" placeholder="绑定工位" clearable size="small" style="width: 180px;">
+        <el-select v-model="listQuery.bound_station_id" placeholder="绑定工位" clearable size="small" style="width: 180px;">
           <el-option
             v-for="station in stationOptions"
-            :key="station.stationId"
-            :label="station.stationName"
-            :value="station.stationId"
+            :key="station.station_id"
+            :label="station.station_name"
+            :value="station.station_id"
           />
         </el-select>
         <el-select v-model="listQuery.status" placeholder="工具状态" clearable size="small" style="width: 120px;">
@@ -47,20 +47,20 @@
 
       <el-table-column label="工具ID" align="center" width="110">
         <template slot-scope="{row}">
-          <span class="code-text">{{ row.toolId }}</span>
+          <span class="code-text">{{ row.tool_id }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="工具名称" align="left" min-width="160">
         <template slot-scope="{row}">
-          <span style="font-weight: bold; color: #303133;">{{ row.toolName }}</span>
+          <span style="font-weight: bold; color: #303133;">{{ row.tool_name }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="绑定的加工工位" align="left" min-width="180">
         <template slot-scope="{row}">
-          <span v-if="row.boundStationName" style="color: #409EFF; font-size: 13px;">
-            <i class="el-icon-connection" /> {{ row.boundStationName }}
+          <span v-if="row.bound_station_name" style="color: #409EFF; font-size: 13px;">
+            <i class="el-icon-connection" /> {{ row.bound_station_name }}
           </span>
           <span v-else style="color: #909399; font-style: italic;">未绑定工位</span>
         </template>
@@ -68,13 +68,13 @@
 
       <el-table-column label="工具 IP 地址" align="center" width="140">
         <template slot-scope="{row}">
-          <el-tag size="small" type="info" effect="plain"><i class="el-icon-share" /> {{ row.ipAddress }}</el-tag>
+          <el-tag size="small" type="info" effect="plain"><i class="el-icon-share" /> {{ row.ip_address }}</el-tag>
         </template>
       </el-table-column>
 
       <el-table-column label="责任人ID" align="center" width="110">
         <template slot-scope="{row}">
-          <span style="font-family: monospace; color: #606266;">{{ row.managerId }}</span>
+          <span style="font-family: monospace; color: #606266;">{{ row.manager_id }}</span>
         </template>
       </el-table-column>
 
@@ -88,23 +88,17 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="录入时间" align="center" width="120">
+      <el-table-column label="录入时间" align="center" width="160">
         <template slot-scope="{row}">
-          <div class="time-column-wrap">
-            <span class="time-date">{{ row.createDate }}</span>
-            <br>
-            <span class="time-clock">{{ row.createClock }}</span>
-          </div>
+          <!-- 时间一行显示，原为两行，后续可改回 -->
+          <span>{{ row.created_at }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="最近校准时间" align="center" width="120">
+      <el-table-column label="最近校准时间" align="center" width="160">
         <template slot-scope="{row}">
-          <div class="time-column-wrap">
-            <span class="time-date">{{ row.updateDate }}</span>
-            <br>
-            <span class="time-clock">{{ row.updateClock }}</span>
-          </div>
+          <!-- 时间一行显示，原为两行，后续可改回 -->
+          <span>{{ row.updated_at }}</span>
         </template>
       </el-table-column>
 
@@ -122,27 +116,27 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog :title="dialogStatus === 'create' ? '✨ 新增现场生产工具' : '🛠️ 查看/修改工具参数'" :visible.sync="dialogFormVisible" width="550px">
+    <el-dialog :title="dialogStatus === 'create' ? '新增现场生产工具' : '查看/修改工具参数'" :visible.sync="dialogFormVisible" width="550px">
       <el-form ref="dataForm" :model="tempFormData" :rules="rules" label-position="right" label-width="110px" style="width: 440px; margin-left:10px;">
-        <el-form-item label="工具名称" prop="toolName">
-          <el-input v-model="tempFormData.toolName" placeholder="如: 马头高级智能数字定扭矩电枪" />
+        <el-form-item label="工具名称" prop="tool_name">
+          <el-input v-model="tempFormData.tool_name" placeholder="如: 马头高级智能数字定扭矩电枪" />
         </el-form-item>
 
-        <el-form-item label="绑定对应工位" prop="boundStationId">
-          <el-select v-model="tempFormData.boundStationId" placeholder="请选择该工具所属的加工工位" style="width: 100%;" clearable>
+        <el-form-item label="绑定对应工位" prop="bound_station_id">
+          <el-select v-model="tempFormData.bound_station_id" placeholder="请选择该工具所属的加工工位" style="width: 100%;" clearable>
             <el-option
               v-for="station in stationOptions"
-              :key="station.stationId"
-              :label="station.stationName"
-              :value="station.stationId"
+              :key="station.station_id"
+              :label="station.station_name"
+              :value="station.station_id"
             />
           </el-select>
         </el-form-item>
 
         <el-row :gutter="10">
           <el-col :span="12">
-            <el-form-item label="责任人ID" prop="managerId" label-width="110px">
-              <el-input v-model="tempFormData.managerId" placeholder="工号" />
+            <el-form-item label="责任人ID" prop="manager_id" label-width="110px">
+              <el-input v-model="tempFormData.manager_id" placeholder="工号" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -152,8 +146,8 @@
           </el-col>
         </el-row>
 
-        <el-form-item label="工具 IP 地址" prop="ipAddress">
-          <el-input v-model="tempFormData.ipAddress" placeholder="如: 192.168.1.201" />
+        <el-form-item label="工具 IP 地址" prop="ip_address">
+          <el-input v-model="tempFormData.ip_address" placeholder="如: 192.168.1.201" />
         </el-form-item>
 
         <el-form-item label="工具状态">
@@ -175,7 +169,6 @@
 
 <script>
 import { fetchToolList, createTool, updateTool, deleteTool } from '@/api/tool'
-import { fetchStationList } from '@/api/station'
 
 export default {
   name: 'ToolManagement',
@@ -191,32 +184,40 @@ export default {
   },
   data() {
     return {
-      listLoading: true,
+      listLoading: false,
       listQuery: {
-        toolName: '',
-        boundStationId: '',
+        page: 1,
+        limit: 10,
+        tool_name: '',
+        bound_station_id: '',
         status: ''
       },
-      stationOptions: [],
+      total: 0,
+      stationOptions: [
+        { station_id: 'ST-001', station_name: '前桥机器人精密压装工位' },
+        { station_id: 'ST-002', station_name: '数字智能扭矩螺栓拧紧工位' },
+        { station_id: 'ST-003', station_name: '气密性透气量综合测试工位' },
+        { station_id: 'ST-004', station_name: '成品形位公差视觉出厂检测' }
+      ],
       toolList: [],
       dialogFormVisible: false,
       dialogStatus: '',
       tempFormData: {
-        toolId: '',
-        toolName: '',
-        boundStationId: '',
-        boundStationName: '',
-        ipAddress: '',
-        managerId: '',
+        tool_id: '',
+        tool_name: '',
+        bound_station_id: '',
+        bound_station_name: '',
+        ip_address: '',
+        manager_id: '',
         manager: '',
         status: '正常启用'
       },
       rules: {
-        toolName: [{ required: true, message: '工具名称为必填项', trigger: 'blur' }],
-        boundStationId: [{ required: true, message: '请绑定对应的加工工位', trigger: 'change' }],
-        managerId: [{ required: true, message: '责任人ID为必填项', trigger: 'blur' }],
+        tool_name: [{ required: true, message: '工具名称为必填项', trigger: 'blur' }],
+        bound_station_id: [{ required: true, message: '请绑定对应的加工工位', trigger: 'change' }],
+        manager_id: [{ required: true, message: '责任人ID为必填项', trigger: 'blur' }],
         manager: [{ required: true, message: '责任人为必填项', trigger: 'blur' }],
-        ipAddress: [
+        ip_address: [
           { required: true, message: '工具IP地址为必填项', trigger: 'blur' },
           { pattern: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/, message: '请输入合法的 IPv4 地址', trigger: 'blur' }
         ]
@@ -224,42 +225,35 @@ export default {
     }
   },
   created() {
-    this.getStationOptions()
     this.getList()
   },
   methods: {
-    getStationOptions() {
-      fetchStationList({}).then(response => {
-        this.stationOptions = response.data.items || []
-      }).catch(err => {
-        console.error(err)
-      })
-    },
     getList() {
       this.listLoading = true
       fetchToolList(this.listQuery).then(response => {
-        this.toolList = response.data.items
+        this.toolList = response.data.list
+        this.total = response.data.total
         this.listLoading = false
-      }).catch(err => {
+      }).catch(() => {
         this.listLoading = false
-        console.error(err)
       })
     },
     handleFilter() {
+      this.listQuery.page = 1
       this.getList()
     },
     resetQuery() {
-      this.listQuery = { toolName: '', boundStationId: '', status: '' }
+      this.listQuery = { page: 1, limit: 10, tool_name: '', bound_station_id: '', status: '' }
       this.getList()
     },
     resetTempFormData() {
       this.tempFormData = {
-        toolId: '',
-        toolName: '',
-        boundStationId: '',
-        boundStationName: '',
-        ipAddress: '',
-        managerId: '',
+        tool_id: '',
+        tool_name: '',
+        bound_station_id: '',
+        bound_station_name: '',
+        ip_address: '',
+        manager_id: '',
         manager: '',
         status: '正常启用'
       }
@@ -275,16 +269,20 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const stationTarget = this.stationOptions.find(o => o.stationId === this.tempFormData.boundStationId)
-          if (stationTarget) {
-            this.tempFormData.boundStationName = stationTarget.stationName
+          const stationTarget = this.stationOptions.find(o => o.station_id === this.tempFormData.bound_station_id)
+          const payload = {
+            tool_name: this.tempFormData.tool_name,
+            bound_station_id: this.tempFormData.bound_station_id,
+            bound_station_name: stationTarget ? stationTarget.station_name : '',
+            ip_address: this.tempFormData.ip_address,
+            manager_id: this.tempFormData.manager_id,
+            manager: this.tempFormData.manager,
+            status: this.tempFormData.status
           }
-          createTool(this.tempFormData).then(() => {
+          createTool(payload).then(() => {
             this.dialogFormVisible = false
             this.$message.success('成功录入并绑定新生产工具！')
             this.getList()
-          }).catch(err => {
-            console.error(err)
           })
         }
       })
@@ -300,29 +298,33 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const stationTarget = this.stationOptions.find(o => o.stationId === this.tempFormData.boundStationId)
-          this.tempFormData.boundStationName = stationTarget ? stationTarget.stationName : ''
-          updateTool(this.tempFormData).then(() => {
+          const stationTarget = this.stationOptions.find(o => o.station_id === this.tempFormData.bound_station_id)
+          const payload = {
+            tool_name: this.tempFormData.tool_name,
+            bound_station_id: this.tempFormData.bound_station_id,
+            bound_station_name: stationTarget ? stationTarget.station_name : '',
+            ip_address: this.tempFormData.ip_address,
+            manager_id: this.tempFormData.manager_id,
+            manager: this.tempFormData.manager,
+            status: this.tempFormData.status
+          }
+          updateTool(this.tempFormData.tool_id, payload).then(() => {
             this.dialogFormVisible = false
             this.$message.success('工具配置修改成功')
             this.getList()
-          }).catch(err => {
-            console.error(err)
           })
         }
       })
     },
     handleDelete(index, row) {
-      this.$confirm(`确要彻底移除工具【${row.toolName}】吗？`, '警告', {
+      this.$confirm(`确要彻底移除工具【${row.tool_name}】吗？`, '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteTool(row.toolId).then(() => {
+        deleteTool(row.tool_id).then(() => {
           this.$message.success('工具解绑并移除成功')
           this.getList()
-        }).catch(err => {
-          console.error(err)
         })
       }).catch(() => {})
     }
@@ -350,25 +352,5 @@ export default {
 .op-btn {
   width: 100px;
   margin-left: 0 !important;
-}
-
-/* 时间强制换行样式补丁 */
-.time-column-wrap {
-  display: block !important;
-  white-space: normal !important;
-  line-height: 1.4;
-  word-break: break-all;
-}
-.time-date {
-  font-size: 13px;
-  color: #303133;
-  font-weight: 500;
-  display: inline-block;
-}
-.time-clock {
-  font-size: 11px;
-  color: #909399;
-  font-family: monospace;
-  display: inline-block;
 }
 </style>

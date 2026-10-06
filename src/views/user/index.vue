@@ -85,15 +85,15 @@
           <div class="user-info">
             <el-avatar
               :size="42"
-              :src="scope.row.avatarUrl"
+              :src="scope.row.avatar_url"
               icon="el-icon-user-solid"
             />
             <div class="user-info-text">
               <div class="real-name">
-                {{ scope.row.realName }}
+                {{ scope.row.real_name }}
               </div>
               <div class="username">
-                {{ scope.row.username }}
+                {{ scope.row.user_name }}
               </div>
             </div>
           </div>
@@ -107,11 +107,11 @@
       >
         <template slot-scope="scope">
           <el-tag
-            v-if="scope.row.cardNumber"
+            v-if="scope.row.card_number"
             type="warning"
             effect="light"
           >
-            {{ scope.row.cardNumber }}
+            {{ scope.row.card_number }}
           </el-tag>
           <span
             v-else
@@ -129,11 +129,11 @@
       >
         <template slot-scope="scope">
           <el-tag
-            v-if="scope.row.shiftGroup"
+            v-if="scope.row.shift_group"
             type="info"
             effect="plain"
           >
-            {{ scope.row.shiftGroup }}
+            {{ scope.row.shift_group }}
           </el-tag>
           <span
             v-else
@@ -192,11 +192,11 @@
         <template slot-scope="scope">
           <div class="time-column-wrap">
             <span class="time-date">
-              {{ scope.row.createdAt | parseTime('{y}-{m}-{d}') }}
+              {{ scope.row.created_at | parseTime('{y}-{m}-{d}') }}
             </span>
             <br>
             <span class="time-clock">
-              {{ scope.row.createdAt | parseTime('{h}:{i}:{s}') }}
+              {{ scope.row.created_at | parseTime('{h}:{i}:{s}') }}
             </span>
           </div>
         </template>
@@ -210,11 +210,11 @@
         <template slot-scope="scope">
           <div class="time-column-wrap">
             <span class="time-date">
-              {{ scope.row.updatedAt | parseTime('{y}-{m}-{d}') }}
+              {{ scope.row.updated_at | parseTime('{y}-{m}-{d}') }}
             </span>
             <br>
             <span class="time-clock">
-              {{ scope.row.updatedAt | parseTime('{h}:{i}:{s}') }}
+              {{ scope.row.updated_at | parseTime('{h}:{i}:{s}') }}
             </span>
           </div>
         </template>
@@ -442,13 +442,22 @@
 
 <script>
 import Pagination from '@/components/Pagination/index.vue'
-import { fetchUserList, createUser, updateUser, deleteUser, updateUserStatus } from '@/api/user'
+import {
+  fetchUserList,
+  createUser as createUserApi,
+  updateUser as updateUserApi,
+  deleteUser as deleteUserApi,
+  disableUser as disableUserApi,
+  enableUser as enableUserApi
+} from '@/api/user'
 
 export default {
   name: 'UserManagement',
+
   components: {
     Pagination
   },
+
   data() {
     const validateConfirmPassword = (rule, value, callback) => {
       if (this.dialogType === 'edit') {
@@ -556,13 +565,22 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      fetchUserList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+
+      fetchUserList({
+        page: this.listQuery.page,
+        limit: this.listQuery.limit,
+        user_name: this.listQuery.username,
+        real_name: this.listQuery.realName,
+        card_number: this.listQuery.cardNumber,
+        shift_group: this.listQuery.shiftGroup,
+        status: this.listQuery.status
+      }).then(response => {
+        const data = response.data
+        this.total = data.total
+        this.list = data.list
         this.listLoading = false
-      }).catch(err => {
+      }).catch(() => {
         this.listLoading = false
-        console.error(err)
       })
     },
 
@@ -586,16 +604,16 @@ export default {
 
     handleEdit(row) {
       this.dialogType = 'edit'
-      this.editUserId = row.id
+      this.editUserId = row.user_id
 
       this.tempForm = {
-        username: row.username,
+        username: row.user_name,
         password: '',
         confirmPassword: '',
-        realName: row.realName,
-        cardNumber: row.cardNumber,
-        shiftGroup: row.shiftGroup,
-        avatarUrl: row.avatarUrl,
+        realName: row.real_name,
+        cardNumber: row.card_number,
+        shiftGroup: row.shift_group,
+        avatarUrl: row.avatar_url,
         status: row.status,
         phone: row.phone
       }
@@ -638,24 +656,36 @@ export default {
     },
 
     createUser() {
-      createUser(this.tempForm).then(() => {
+      createUserApi({
+        user_name: this.tempForm.username,
+        password: this.tempForm.password,
+        real_name: this.tempForm.realName,
+        card_number: this.tempForm.cardNumber,
+        shift_group: this.tempForm.shiftGroup,
+        avatar_url: this.tempForm.avatarUrl,
+        status: this.tempForm.status,
+        phone: this.tempForm.phone
+      }).then(() => {
         this.dialogFormVisible = false
         this.listQuery.page = 1
         this.getList()
         this.$message.success('用户创建成功')
-      }).catch(err => {
-        console.error(err)
-      })
+      }).catch(() => {})
     },
 
     updateUser() {
-      updateUser({ ...this.tempForm, id: this.editUserId }).then(() => {
+      updateUserApi(this.editUserId, {
+        real_name: this.tempForm.realName,
+        card_number: this.tempForm.cardNumber,
+        shift_group: this.tempForm.shiftGroup,
+        avatar_url: this.tempForm.avatarUrl,
+        status: this.tempForm.status,
+        phone: this.tempForm.phone
+      }).then(() => {
         this.dialogFormVisible = false
         this.getList()
         this.$message.success('用户信息修改成功')
-      }).catch(err => {
-        console.error(err)
-      })
+      }).catch(() => {})
     },
 
     handleDialogClose() {
@@ -678,7 +708,7 @@ export default {
 
     handleDisable(row) {
       this.$confirm(
-        `确定要禁用用户【${row.realName}】吗？`,
+        `确定要禁用用户【${row.real_name}】吗？`,
         '提示',
         {
           confirmButtonText: '确定',
@@ -686,18 +716,16 @@ export default {
           type: 'warning'
         }
       ).then(() => {
-        updateUserStatus(row.id, 0).then(() => {
+        disableUserApi(row.user_id).then(() => {
           this.getList()
           this.$message.success('用户已禁用')
-        }).catch(err => {
-          console.error(err)
         })
       }).catch(() => {})
     },
 
     handleEnable(row) {
       this.$confirm(
-        `确定要启用用户【${row.realName}】吗？`,
+        `确定要启用用户【${row.real_name}】吗？`,
         '提示',
         {
           confirmButtonText: '确定',
@@ -705,18 +733,16 @@ export default {
           type: 'info'
         }
       ).then(() => {
-        updateUserStatus(row.id, 1).then(() => {
+        enableUserApi(row.user_id).then(() => {
           this.getList()
           this.$message.success('用户已启用')
-        }).catch(err => {
-          console.error(err)
         })
       }).catch(() => {})
     },
 
     handleDelete(row) {
       this.$confirm(
-        `确定要删除用户【${row.realName}】吗？`,
+        `确定要删除用户【${row.real_name}】吗？`,
         '提示',
         {
           confirmButtonText: '确定删除',
@@ -724,18 +750,15 @@ export default {
           type: 'warning'
         }
       ).then(() => {
-        deleteUser(row.id).then(() => {
+        deleteUserApi(row.user_id).then(() => {
           if (
             this.listQuery.page > 1 &&
             this.list.length === 1
           ) {
             this.listQuery.page--
           }
-
           this.getList()
           this.$message.success('删除成功')
-        }).catch(err => {
-          console.error(err)
         })
       }).catch(() => {})
     }

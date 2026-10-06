@@ -3,7 +3,7 @@
 
     <div class="filter-container" style="margin-bottom: 20px;">
       <el-input
-        v-model="listQuery.projectId"
+        v-model="listQuery.project_id"
         placeholder="项目ID"
         style="width: 140px; margin-right: 10px;"
         class="filter-item"
@@ -12,7 +12,7 @@
       />
 
       <el-input
-        v-model="listQuery.projectName"
+        v-model="listQuery.project_name"
         placeholder="项目名"
         style="width: 180px; margin-right: 10px;"
         class="filter-item"
@@ -30,7 +30,7 @@
       />
 
       <el-input
-        v-model="listQuery.jobNum"
+        v-model="listQuery.job_num"
         placeholder="工号"
         style="width: 120px; margin-right: 10px;"
         class="filter-item"
@@ -64,19 +64,19 @@
 
       <el-table-column align="center" label="项目ID" width="140">
         <template slot-scope="scope">
-          <span style="font-family: monospace; font-weight: bold; color: #1890ff;">{{ scope.row.projectId }}</span>
+          <span style="font-family: monospace; font-weight: bold; color: #1890ff;">{{ scope.row.project_id }}</span>
         </template>
       </el-table-column>
 
       <el-table-column min-width="180px" label="项目名">
         <template slot-scope="{row}">
-          <span style="font-weight: bold; color: #303133;">{{ row.projectName }}</span>
+          <span style="font-weight: bold; color: #303133;">{{ row.project_name }}</span>
         </template>
       </el-table-column>
 
       <el-table-column width="110px" align="center" label="工号">
         <template slot-scope="scope">
-          <el-tag size="medium" type="warning" effect="light">{{ scope.row.jobNum }}</el-tag>
+          <el-tag size="medium" type="warning" effect="light">{{ scope.row.job_num }}</el-tag>
         </template>
       </el-table-column>
 
@@ -88,27 +88,21 @@
 
       <el-table-column width="110px" align="center" label="分总成数量">
         <template slot-scope="scope">
-          <el-tag type="info" effect="plain">{{ scope.row.subAssemblyCount }} 个</el-tag>
+          <el-tag type="info" effect="plain">{{ scope.row.sub_assembly_count }} 个</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column width="120px" align="center" label="创建时间" prop="gmt_create" sortable="custom">
+      <el-table-column width="160px" align="center" label="创建时间" prop="created_at" sortable="custom">
         <template slot-scope="scope">
-          <div class="time-column-wrap">
-            <span class="time-date">{{ scope.row.createTime | parseTime('{y}-{m}-{d}') }}</span>
-            <br>
-            <span class="time-clock">{{ scope.row.createTime | parseTime('{h}:{i}:{s}') }}</span>
-          </div>
+          <!-- 时间一行显示，原为两行，后续可改回 -->
+          <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="120px" align="center" label="最近修改时间" prop="gmt_modified" sortable="custom">
+      <el-table-column width="160px" align="center" label="最近修改时间" prop="updated_at" sortable="custom">
         <template slot-scope="scope">
-          <div class="time-column-wrap">
-            <span class="time-date">{{ scope.row.updateTime | parseTime('{y}-{m}-{d}') }}</span>
-            <br>
-            <span class="time-clock">{{ scope.row.updateTime | parseTime('{h}:{i}:{s}') }}</span>
-          </div>
+          <!-- 时间一行显示，原为两行，后续可改回 -->
+          <span>{{ scope.row.updated_at | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
 
@@ -128,24 +122,27 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
-    <el-dialog title="新建项目" :visible.sync="dialogFormVisible" width="500px">
+    <el-dialog :title="dialogStatus === 'create' ? '新建项目' : '编辑项目'" :visible.sync="dialogFormVisible" width="500px">
       <el-form ref="dataForm" :model="tempForm" :rules="rules" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="项目ID">
-          <el-input v-model="tempForm.projectId" disabled placeholder="系统自动生成" />
+        <el-form-item v-if="dialogStatus === 'create'" label="项目ID">
+          <el-input v-model="tempForm.project_id" disabled placeholder="系统自动生成" />
         </el-form-item>
-        <el-form-item label="项目名称" prop="projectName">
-          <el-input v-model="tempForm.projectName" placeholder="请输入项目名称" />
+        <el-form-item v-else label="项目ID">
+          <el-input v-model="tempForm.project_id" disabled />
+        </el-form-item>
+        <el-form-item label="项目名称" prop="project_name">
+          <el-input v-model="tempForm.project_name" placeholder="请输入项目名称" />
         </el-form-item>
         <el-form-item label="管理者姓名">
           <el-input v-model="tempForm.manager" disabled placeholder="系统自动获取" />
         </el-form-item>
         <el-form-item label="管理者工号">
-          <el-input v-model="tempForm.jobNum" disabled placeholder="系统自动获取" />
+          <el-input v-model="tempForm.job_num" disabled placeholder="系统自动获取" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="createData">确认创建</el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确认提交</el-button>
       </div>
     </el-dialog>
 
@@ -153,7 +150,7 @@
 </template>
 
 <script>
-import { fetchProjectList, createProject, deleteProject } from '@/api/project'
+import { fetchProjectList, createProject, updateProject, deleteProject } from '@/api/project'
 import Pagination from '@/components/Pagination/index.vue'
 
 export default {
@@ -161,27 +158,28 @@ export default {
   components: { Pagination },
   data() {
     return {
-      list: null,
+      list: [],
       total: 0,
       listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        projectId: undefined,
-        projectName: undefined,
+        project_id: undefined,
+        project_name: undefined,
         manager: undefined,
-        jobNum: undefined,
-        sort: '-gmt_create'
+        job_num: undefined,
+        sort: '-created_at'
       },
       dialogFormVisible: false,
+      dialogStatus: '',
       tempForm: {
-        projectId: '',
-        projectName: '',
+        project_id: '',
+        project_name: '',
         manager: '',
-        jobNum: ''
+        job_num: ''
       },
       rules: {
-        projectName: [{ required: true, message: '项目名称不能为空', trigger: 'blur' }]
+        project_name: [{ required: true, message: '项目名称不能为空', trigger: 'blur' }]
       }
     }
   },
@@ -204,69 +202,80 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
+    resetTempForm() {
+      this.tempForm = {
+        project_id: '',
+        project_name: '',
+        manager: '',
+        job_num: ''
+      }
+    },
     handleCreate() {
       this.resetTempForm()
-      const localManagerName = '刘智'
-      const localJobNum = 'KD1024'
-
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-      let randomProjectId = ''
-      for (let i = 0; i < 10; i++) {
-        randomProjectId += chars.charAt(Math.floor(Math.random() * chars.length))
-      }
-
-      this.tempForm.projectId = randomProjectId
-      this.tempForm.manager = localManagerName
-      this.tempForm.jobNum = localJobNum
-
+      this.dialogStatus = 'create'
+      this.tempForm.manager = '张兵'
+      this.tempForm.job_num = 'KD-0842'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    resetTempForm() {
-      this.tempForm = {
-        projectId: '',
-        projectName: '',
-        manager: '',
-        jobNum: ''
-      }
-    },
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createProject(this.tempForm).then(() => {
+          const payload = {
+            project_name: this.tempForm.project_name
+          }
+          createProject(payload).then(response => {
             this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '项目创建成功',
+            this.$message({
               type: 'success',
+              message: '项目创建成功',
               duration: 2000
             })
             this.getList()
-          }).catch(err => {
-            console.error(err)
           })
         }
       })
     },
     handleEdit(row) {
-      this.$router.push(`/production_management/project/edit/${row.id}`)
+      this.tempForm = Object.assign({}, row)
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    updateData() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          const payload = {
+            project_name: this.tempForm.project_name
+          }
+          updateProject(this.tempForm.project_id, payload).then(() => {
+            this.dialogFormVisible = false
+            this.$message({
+              type: 'success',
+              message: '项目修改成功',
+              duration: 2000
+            })
+            this.getList()
+          })
+        }
+      })
     },
     handleDelete(row, index) {
-      this.$confirm(`确定要删除项目【${row.projectName}】吗?`, '提示', {
+      this.$confirm(`确定要删除项目【${row.project_name}】吗?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteProject(row.id).then(() => {
+        deleteProject(row.project_id).then(() => {
           this.$message({
             type: 'success',
             message: '删除成功!'
           })
           this.getList()
-        }).catch(err => {
-          console.error(err)
         })
       }).catch(() => {
         this.$message({
@@ -279,10 +288,10 @@ export default {
       const { prop, order } = data
       if (!order) {
         this.listQuery.sort = undefined
-      } else if (prop === 'gmt_create') {
-        this.listQuery.sort = order === 'ascending' ? '+gmt_create' : '-gmt_create'
-      } else if (prop === 'gmt_modified') {
-        this.listQuery.sort = order === 'ascending' ? '+gmt_modified' : '-gmt_modified'
+      } else if (prop === 'created_at') {
+        this.listQuery.sort = order === 'ascending' ? 'created_at' : '-created_at'
+      } else if (prop === 'updated_at') {
+        this.listQuery.sort = order === 'ascending' ? 'updated_at' : '-updated_at'
       }
       this.handleFilter()
     }
@@ -301,25 +310,5 @@ export default {
 .op-btn {
   width: 100px;
   margin-left: 0 !important;
-}
-
-/* 时间列强制垂直换行样式 */
-.time-column-wrap {
-  display: block !important;
-  white-space: normal !important;
-  line-height: 1.4;
-  word-break: break-all;
-}
-.time-date {
-  font-size: 13px;
-  color: #303133;
-  font-weight: 500;
-  display: inline-block;
-}
-.time-clock {
-  font-size: 11px;
-  color: #909399;
-  font-family: monospace;
-  display: inline-block;
 }
 </style>

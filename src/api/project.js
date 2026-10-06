@@ -10,24 +10,23 @@ export function fetchProjectList(query) {
 
 export function createProject(data) {
   return request({
-    url: '/project/create',
+    url: '/project',
     method: 'post',
     data
   })
 }
 
-export function updateProject(data) {
+export function updateProject(projectId, data) {
   return request({
-    url: '/project/update',
-    method: 'post',
+    url: `/project/${projectId}`,
+    method: 'put',
     data
   })
 }
 
-export function deleteProject(id) {
+export function deleteProject(projectId) {
   return request({
-    url: '/project/delete',
-    method: 'post',
-    params: { id }
+    url: `/project/${projectId}`,
+    method: 'delete'
   })
 }
