@@ -90,10 +90,22 @@ export const constantRoutes = [
     meta: { title: '用户管理' },
     children: [
       {
-        path: 'project',
+        path: 'user',
         component: () => import('@/views/user/index'),
-        name: 'UserManagement', // 🟢 已由 '项目配置' 改为英文
+        name: 'UserManagement',
         meta: { title: '用户管理' }
+      },
+      {
+        path: 'test',
+        component: () => import('@/views/user/insert'),
+        name: 'Test',
+        meta: { title: '测试' }
+      },
+      {
+        path: 'sop',
+        component: () => import('@/views/sop/annotation'),
+        name: 'annotation',
+        meta: { title: 'annotation' }
       }
     ]
   },
@@ -106,28 +118,27 @@ export const constantRoutes = [
       {
         path: 'project',
         component: () => import('@/views/project/index'),
-        name: 'ProjectManagement', // 🟢 已由 '项目配置' 改为英文
+        name: 'ProjectManagement',
         meta: { title: '项目管理' }
       },
       {
         path: 'project/edit/:id(\\d+)',
         component: () => import('@/views/project/edit'),
-        name: 'ProjectEdit', // 🟢 已由 '项目详情' 改为英文
+        name: 'ProjectEdit',
         meta: { title: '项目详情' },
         hidden: true
       },
       {
         path: 'project/process/:assemblyId',
         component: () => import('@/views/project/process'),
-        name: 'AssemblyProcess', // 🟢 已由 '工序配置' 改为英文
+        name: 'AssemblyProcess',
         meta: { title: '工序配置' },
         hidden: true
       },
-      // 💡 顺便把我们刚刚做好的同级【工位配置】也以规范的英文名塞在这里
       {
         path: 'station',
         component: () => import('@/views/station/index'),
-        name: 'StationManagement', // 🟢 规范的英文组件名
+        name: 'StationManagement',
         meta: { title: '工位管理' }
       },
       {
