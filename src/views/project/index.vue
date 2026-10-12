@@ -122,13 +122,10 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
-    <el-dialog :title="dialogStatus === 'create' ? '新建项目' : '编辑项目'" :visible.sync="dialogFormVisible" width="500px">
+    <el-dialog title="新建项目" :visible.sync="dialogFormVisible" width="500px">
       <el-form ref="dataForm" :model="tempForm" :rules="rules" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item v-if="dialogStatus === 'create'" label="项目ID">
+        <el-form-item label="项目ID">
           <el-input v-model="tempForm.project_id" disabled placeholder="系统自动生成" />
-        </el-form-item>
-        <el-form-item v-else label="项目ID">
-          <el-input v-model="tempForm.project_id" disabled />
         </el-form-item>
         <el-form-item label="项目名称" prop="project_name">
           <el-input v-model="tempForm.project_name" placeholder="请输入项目名称" />
@@ -142,7 +139,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确认提交</el-button>
+        <el-button type="primary" @click="createData">确认创建</el-button>
       </div>
     </el-dialog>
 
@@ -150,7 +147,7 @@
 </template>
 
 <script>
-import { fetchProjectList, createProject, updateProject, deleteProject } from '@/api/project'
+import { fetchProjectList, createProject, deleteProject } from '@/api/project'
 import Pagination from '@/components/Pagination/index.vue'
 
 export default {
@@ -171,7 +168,6 @@ export default {
         sort: '-created_at'
       },
       dialogFormVisible: false,
-      dialogStatus: '',
       tempForm: {
         project_id: '',
         project_name: '',
@@ -212,7 +208,6 @@ export default {
     },
     handleCreate() {
       this.resetTempForm()
-      this.dialogStatus = 'create'
       this.tempForm.manager = '张兵'
       this.tempForm.job_num = 'KD-0842'
       this.dialogFormVisible = true
@@ -239,30 +234,9 @@ export default {
       })
     },
     handleEdit(row) {
-      this.tempForm = Object.assign({}, row)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const payload = {
-            project_name: this.tempForm.project_name
-          }
-          updateProject(this.tempForm.project_id, payload).then(() => {
-            this.dialogFormVisible = false
-            this.$message({
-              type: 'success',
-              message: '项目修改成功',
-              duration: 2000
-            })
-            this.getList()
-          })
-        }
-      })
+      console.log('点击的行数据:', row)
+      console.log('project_id:', row.project_id)
+      this.$router.push(`/production_management/project/edit/${row.project_id}`)
     },
     handleDelete(row, index) {
       this.$confirm(`确定要删除项目【${row.project_name}】吗?`, '提示', {

@@ -6,15 +6,15 @@
         <h3 class="title">SOP管理端</h3>
       </div>
 
-      <el-form-item prop="account">
+      <el-form-item prop="username">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
         <el-input
-          ref="account"
-          v-model="loginForm.account"
+          ref="username"
+          v-model="loginForm.username"
           placeholder="账号"
-          name="account"
+          name="username"
           type="text"
           tabindex="1"
           autocomplete="on"
@@ -45,26 +45,7 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-form-item prop="captcha_code">
-        <div class="captcha-wrapper">
-          <span class="svg-container">
-            <svg-icon icon-class="email" />
-          </span>
-          <el-input
-            v-model="loginForm.captcha_code"
-            placeholder="验证码"
-            name="captcha_code"
-            type="text"
-            tabindex="3"
-            autocomplete="off"
-          />
-          <div class="captcha-code-box" @click="refreshCaptcha" :title="'点击刷新验证码'">
-            {{ captcha_text }}
-          </div>
-        </div>
-      </el-form-item>
-
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登 录</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @keyup.enter.native="handleLogin" @click.native.prevent="handleLogin">登 录</el-button>
 
       <div style="position:relative">
         <div class="tips">
@@ -100,9 +81,9 @@ export default {
   name: 'Login',
   components: { SocialSign },
   data() {
-    const validateAccount = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('请输入正确的账号'))
+    const validateUsername = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入账号'))
       } else {
         callback()
       }
@@ -114,25 +95,14 @@ export default {
         callback()
       }
     }
-    const validateCaptcha = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入验证码'))
-      } else {
-        callback()
-      }
-    }
     return {
       loginForm: {
-        account: 'root',
-        password: '123456',
-        captcha_code: '',
-        login_type: 'password'
+        username: 'root',
+        password: '88888888'
       },
-      captcha_text: '8888',
       loginRules: {
-        account: [{ required: true, trigger: 'blur', validator: validateAccount }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
-        captcha_code: [{ required: true, trigger: 'blur', validator: validateCaptcha }]
+        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       passwordType: 'password',
       capsTooltip: false,
