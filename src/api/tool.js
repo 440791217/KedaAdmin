@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 
+// 工具列表
 export function fetchToolList(query) {
   return request({
     url: '/tool/list',
@@ -8,6 +9,7 @@ export function fetchToolList(query) {
   })
 }
 
+// 新增工具
 export function createTool(data) {
   return request({
     url: '/tool',
@@ -16,17 +18,19 @@ export function createTool(data) {
   })
 }
 
-export function updateTool(toolId, data) {
+// 编辑工具
+export function updateTool(id, data) {
   return request({
-    url: `/tool/${toolId}`,
+    url: `/tool/${id}`,
     method: 'put',
     data
   })
 }
 
-export function deleteTool(toolId) {
+// 删除工具
+export function deleteTool(id) {
   return request({
-    url: `/tool/${toolId}`,
+    url: `/tool/${id}`,
     method: 'delete'
   })
 }

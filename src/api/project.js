@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 
+// 项目列表
 export function fetchProjectList(query) {
   return request({
     url: '/project/list',
@@ -8,6 +9,7 @@ export function fetchProjectList(query) {
   })
 }
 
+// 新增项目
 export function createProject(data) {
   return request({
     url: '/project',
@@ -16,17 +18,19 @@ export function createProject(data) {
   })
 }
 
-export function updateProject(projectId, data) {
+// 编辑项目
+export function updateProject(id, data) {
   return request({
-    url: `/project/${projectId}`,
+    url: `/project/${id}`,
     method: 'put',
     data
   })
 }
 
-export function deleteProject(projectId) {
+// 删除项目
+export function deleteProject(id) {
   return request({
-    url: `/project/${projectId}`,
+    url: `/project/${id}`,
     method: 'delete'
   })
 }

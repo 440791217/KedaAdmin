@@ -45,6 +45,24 @@
         </el-form-item>
       </el-tooltip>
 
+      <el-form-item prop="captcha_code">
+        <div class="captcha-wrapper">
+          <span class="svg-container">
+            <svg-icon icon-class="skill" />
+          </span>
+          <el-input
+            v-model="loginForm.captcha_code"
+            placeholder="验证码"
+            name="captcha_code"
+            type="text"
+            tabindex="3"
+            autocomplete="off"
+            @keyup.enter.native="handleLogin"
+          />
+          <div class="captcha-code-box" @click="refreshCaptcha">{{ captcha_text }}</div>
+        </div>
+      </el-form-item>
+
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @keyup.enter.native="handleLogin" @click.native.prevent="handleLogin">登 录</el-button>
 
       <div style="position:relative">
@@ -74,7 +92,6 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 
 export default {
@@ -95,14 +112,27 @@ export default {
         callback()
       }
     }
+    const captchaText = '8888'
+    const validateCaptcha = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入验证码'))
+      } else if (value !== captchaText) {
+        callback(new Error('验证码错误'))
+      } else {
+        callback()
+      }
+    }
     return {
       loginForm: {
         username: 'root',
-        password: '88888888'
+        password: '88888888',
+        captcha_code: ''
       },
+      captcha_text: captchaText,
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+        captcha_code: [{ required: true, trigger: 'blur', validator: validateCaptcha }]
       },
       passwordType: 'password',
       capsTooltip: false,
@@ -126,10 +156,11 @@ export default {
   },
   created() {
     // window.addEventListener('storage', this.afterQRScan)
+    this.refreshCaptcha()
   },
   mounted() {
-    if (this.loginForm.account === '') {
-      this.$refs.account.focus()
+    if (this.loginForm.username === '') {
+      this.$refs.username.focus()
     } else if (this.loginForm.password === '') {
       this.$refs.password.focus()
     }
@@ -153,12 +184,7 @@ export default {
       })
     },
     refreshCaptcha() {
-      // 生成 4 位随机数字验证码
-      let code = ''
-      for (let i = 0; i < 4; i++) {
-        code += Math.floor(Math.random() * 10)
-      }
-      this.captcha_text = code
+      this.captcha_text = '8888'
       this.loginForm.captcha_code = ''
     },
     handleLogin() {
@@ -172,6 +198,7 @@ export default {
             })
             .catch(() => {
               this.loading = false
+              this.refreshCaptcha()
             })
         } else {
           console.log('error submit!!')

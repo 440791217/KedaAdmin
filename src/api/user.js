@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 
+// 登录
 export function login(params) {
   return request({
     url: '/user/login',
@@ -8,6 +9,7 @@ export function login(params) {
   })
 }
 
+// 登出
 export function logout() {
   return request({
     url: '/user/logout',
@@ -15,15 +17,7 @@ export function logout() {
   })
 }
 
-// 已废弃：登录接口已一次性返回用户信息，无需单独调用
-// export function getInfo(token) {
-//   return request({
-//     url: '/user/info',
-//     method: 'get',
-//     params: { token }
-//   })
-// }
-
+// 用户列表
 export function fetchUserList(query) {
   return request({
     url: '/auth/user/list',
@@ -32,6 +26,7 @@ export function fetchUserList(query) {
   })
 }
 
+// 新增用户
 export function createUser(data) {
   return request({
     url: '/auth/user',
@@ -40,31 +35,28 @@ export function createUser(data) {
   })
 }
 
-export function updateUser(userId, data) {
+// 编辑用户
+export function updateUser(id, data) {
   return request({
-    url: `/auth/user/${userId}`,
+    url: `/auth/user/${id}`,
     method: 'put',
     data
   })
 }
 
-export function deleteUser(userId) {
+// 删除用户
+export function deleteUser(id) {
   return request({
-    url: `/auth/user/${userId}`,
+    url: `/auth/user/${id}`,
     method: 'delete'
   })
 }
 
-export function disableUser(userId) {
+// 修改用户状态
+export function updateUserStatus(id, status) {
   return request({
-    url: `/auth/user/${userId}/disable`,
-    method: 'put'
-  })
-}
-
-export function enableUser(userId) {
-  return request({
-    url: `/auth/user/${userId}/enable`,
-    method: 'put'
+    url: `/auth/user/${id}/status`,
+    method: 'put',
+    params: { status }
   })
 }
