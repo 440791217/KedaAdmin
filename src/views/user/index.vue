@@ -9,21 +9,21 @@
         @keyup.enter.native="handleFilter"
       />
       <el-input
-        v-model="listQuery.realName"
+        v-model="listQuery.real_name"
         placeholder="真实姓名"
         clearable
         style="width: 130px; margin-right: 10px;"
         @keyup.enter.native="handleFilter"
       />
       <el-input
-        v-model="listQuery.cardNumber"
+        v-model="listQuery.card_number"
         placeholder="工卡/RFID"
         clearable
         style="width: 160px; margin-right: 10px;"
         @keyup.enter.native="handleFilter"
       />
       <el-select
-        v-model="listQuery.shiftGroup"
+        v-model="listQuery.shift_group"
         placeholder="所属班组"
         clearable
         style="width: 130px; margin-right: 10px;"
@@ -244,7 +244,7 @@
               size="mini"
               icon="el-icon-lock"
               class="op-btn"
-              @click="handleDisable(scope.row)"
+              @click="handleStatusChange(scope.row, 0)"
             >
               禁用
             </el-button>
@@ -255,7 +255,7 @@
               size="mini"
               icon="el-icon-unlock"
               class="op-btn"
-              @click="handleEnable(scope.row)"
+              @click="handleStatusChange(scope.row, 1)"
             >
               启用
             </el-button>
@@ -340,10 +340,10 @@
 
         <el-form-item
           label="真实姓名"
-          prop="realName"
+          prop="real_name"
         >
           <el-input
-            v-model="tempForm.realName"
+            v-model="tempForm.real_name"
             placeholder="请输入真实姓名"
             maxlength="64"
           />
@@ -351,11 +351,11 @@
 
         <el-form-item
           label="工卡/RFID"
-          prop="cardNumber"
+          prop="card_number"
         >
           <div class="card-input">
             <el-input
-              v-model="tempForm.cardNumber"
+              v-model="tempForm.card_number"
               placeholder="请输入或读取工卡"
               maxlength="64"
             />
@@ -371,10 +371,10 @@
 
         <el-form-item
           label="所属班组"
-          prop="shiftGroup"
+          prop="shift_group"
         >
           <el-select
-            v-model="tempForm.shiftGroup"
+            v-model="tempForm.shift_group"
             placeholder="请选择所属班组"
             style="width: 100%;"
           >
@@ -398,10 +398,10 @@
 
         <el-form-item
           label="头像地址"
-          prop="avatarUrl"
+          prop="avatar_url"
         >
           <el-input
-            v-model="tempForm.avatarUrl"
+            v-model="tempForm.avatar_url"
             placeholder="请输入头像图片地址"
             maxlength="255"
           />
@@ -447,7 +447,11 @@ import {
   createUser as createUserApi,
   updateUser as updateUserApi,
   deleteUser as deleteUserApi,
+<<<<<<< HEAD
   updateUserStatus as updateUserStatusApi
+=======
+  updateUserStatus
+>>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
 } from '@/api/user'
 
 export default {
@@ -484,9 +488,9 @@ export default {
         page: 1,
         limit: 10,
         username: '',
-        realName: '',
-        cardNumber: '',
-        shiftGroup: '',
+        real_name: '',
+        card_number: '',
+        shift_group: '',
         status: ''
       },
 
@@ -494,10 +498,10 @@ export default {
         username: '',
         password: '',
         confirmPassword: '',
-        realName: '',
-        cardNumber: '',
-        shiftGroup: '',
-        avatarUrl: '',
+        real_name: '',
+        card_number: '',
+        shift_group: '',
+        avatar_url: '',
         status: 1,
         phone: ''
       },
@@ -539,7 +543,7 @@ export default {
             trigger: 'blur'
           }
         ],
-        realName: [
+        real_name: [
           {
             required: true,
             message: '请输入真实姓名',
@@ -565,6 +569,7 @@ export default {
     getList() {
       this.listLoading = true
 
+<<<<<<< HEAD
       fetchUserList({
         page: this.listQuery.page,
         limit: this.listQuery.limit,
@@ -574,6 +579,9 @@ export default {
         shift_group: this.listQuery.shiftGroup,
         status: this.listQuery.status
       }).then(response => {
+=======
+      fetchUserList(this.listQuery).then(response => {
+>>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         const data = response.data
         this.total = data.total
         this.list = data.items
@@ -609,10 +617,10 @@ export default {
         username: row.username,
         password: '',
         confirmPassword: '',
-        realName: row.real_name,
-        cardNumber: row.card_number,
-        shiftGroup: row.shift_group,
-        avatarUrl: row.avatar_url,
+        real_name: row.real_name,
+        card_number: row.card_number,
+        shift_group: row.shift_group,
+        avatar_url: row.avatar_url,
         status: row.status,
         phone: row.phone
       }
@@ -631,10 +639,10 @@ export default {
         username: '',
         password: '',
         confirmPassword: '',
-        realName: '',
-        cardNumber: '',
-        shiftGroup: '',
-        avatarUrl: '',
+        real_name: '',
+        card_number: '',
+        shift_group: '',
+        avatar_url: '',
         status: 1,
         phone: ''
       }
@@ -655,16 +663,22 @@ export default {
     },
 
     createUser() {
+<<<<<<< HEAD
       createUserApi({
+=======
+      const payload = {
+>>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         username: this.tempForm.username,
         password: this.tempForm.password,
-        real_name: this.tempForm.realName,
-        card_number: this.tempForm.cardNumber,
-        shift_group: this.tempForm.shiftGroup,
-        avatar_url: this.tempForm.avatarUrl,
+        real_name: this.tempForm.real_name,
+        card_number: this.tempForm.card_number,
+        shift_group: this.tempForm.shift_group,
+        avatar_url: this.tempForm.avatar_url,
         status: this.tempForm.status,
         phone: this.tempForm.phone
-      }).then(() => {
+      }
+
+      createUserApi(payload).then(() => {
         this.dialogFormVisible = false
         this.listQuery.page = 1
         this.getList()
@@ -673,14 +687,16 @@ export default {
     },
 
     updateUser() {
-      updateUserApi(this.editUserId, {
-        real_name: this.tempForm.realName,
-        card_number: this.tempForm.cardNumber,
-        shift_group: this.tempForm.shiftGroup,
-        avatar_url: this.tempForm.avatarUrl,
+      const payload = {
+        real_name: this.tempForm.real_name,
+        card_number: this.tempForm.card_number,
+        shift_group: this.tempForm.shift_group,
+        avatar_url: this.tempForm.avatar_url,
         status: this.tempForm.status,
         phone: this.tempForm.phone
-      }).then(() => {
+      }
+
+      updateUserApi(this.editUserId, payload).then(() => {
         this.dialogFormVisible = false
         this.getList()
         this.$message.success('用户信息修改成功')
@@ -701,13 +717,14 @@ export default {
         Math.floor(Math.random() * 1000000)
       ).padStart(6, '0')}`
 
-      this.tempForm.cardNumber = cardNumber
+      this.tempForm.card_number = cardNumber
       this.$message.success(`读取工卡成功：${cardNumber}`)
     },
 
-    handleDisable(row) {
+    handleStatusChange(row, targetStatus) {
+      const actionText = targetStatus === 1 ? '启用' : '禁用'
       this.$confirm(
-        `确定要禁用用户【${row.real_name}】吗？`,
+        `确定要${actionText}用户【${row.real_name}】吗？`,
         '提示',
         {
           confirmButtonText: '确定',
@@ -715,6 +732,7 @@ export default {
           type: 'warning'
         }
       ).then(() => {
+<<<<<<< HEAD
         updateUserStatusApi(row.id, 0).then(() => {
           this.getList()
           this.$message.success('用户已禁用')
@@ -735,6 +753,11 @@ export default {
         updateUserStatusApi(row.id, 1).then(() => {
           this.getList()
           this.$message.success('用户已启用')
+=======
+        updateUserStatus(row.id, targetStatus).then(() => {
+          this.getList()
+          this.$message.success(`用户已${actionText}`)
+>>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         })
       }).catch(() => {})
     },

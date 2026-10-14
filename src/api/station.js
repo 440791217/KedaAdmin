@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 
+// 工位列表
 export function fetchStationList(query) {
   return request({
     url: '/station/list',
@@ -8,6 +9,7 @@ export function fetchStationList(query) {
   })
 }
 
+// 新增工位
 export function createStation(data) {
   return request({
     url: '/station',
@@ -16,17 +18,19 @@ export function createStation(data) {
   })
 }
 
-export function updateStation(stationId, data) {
+// 编辑工位
+export function updateStation(id, data) {
   return request({
-    url: `/station/${stationId}`,
+    url: `/station/${id}`,
     method: 'put',
     data
   })
 }
 
-export function deleteStation(stationId) {
+// 删除工位
+export function deleteStation(id) {
   return request({
-    url: `/station/${stationId}`,
+    url: `/station/${id}`,
     method: 'delete'
   })
 }
