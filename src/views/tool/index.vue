@@ -20,15 +20,9 @@
           />
         </el-select>
         <el-select v-model="listQuery.status" placeholder="工具状态" clearable size="small" style="width: 120px;">
-<<<<<<< HEAD
           <el-option label="正常启用" :value="0" />
           <el-option label="检测待校准" :value="1" />
           <el-option label="故障停用" :value="2" />
-=======
-          <el-option label="正常启用" :value="1" />
-          <el-option label="检测待校准" :value="2" />
-          <el-option label="故障停用" :value="0" />
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         </el-select>
         <el-button type="primary" icon="el-icon-search" size="small" @click="handleFilter">搜索</el-button>
         <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
@@ -51,11 +45,7 @@
     >
       <el-table-column label="序号" type="index" align="center" width="60" />
 
-<<<<<<< HEAD
       <el-table-column label="工具编码" align="center" width="110">
-=======
-      <el-table-column label="工具编码" align="center" width="120">
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         <template slot-scope="{row}">
           <span class="code-text">{{ row.tool_code }}</span>
         </template>
@@ -88,21 +78,12 @@
         </template>
       </el-table-column>
 
-<<<<<<< HEAD
       <el-table-column label="责任人" align="center" width="100" prop="manager_name" />
 
       <el-table-column label="状态" align="center" width="100">
         <template slot-scope="{row}">
           <el-tag :type="statusFilter(row.status)" size="small" effect="dark">
             {{ statusText(row.status) }}
-=======
-      <el-table-column label="负责人姓名" align="center" width="100" prop="manager_name" />
-
-      <el-table-column label="状态" align="center" width="100">
-        <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter" size="small" effect="dark">
-            {{ row.status | statusText }}
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
           </el-tag>
         </template>
       </el-table-column>
@@ -115,21 +96,13 @@
 
       <el-table-column label="录入时间" align="center" width="160">
         <template slot-scope="{row}">
-<<<<<<< HEAD
           <span>{{ row.created_at }}</span>
-=======
-          <span>{{ row.created_at | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         </template>
       </el-table-column>
 
       <el-table-column label="最近更新时间" align="center" width="160">
         <template slot-scope="{row}">
-<<<<<<< HEAD
           <span>{{ row.updated_at }}</span>
-=======
-          <span>{{ row.updated_at | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         </template>
       </el-table-column>
 
@@ -161,17 +134,8 @@
           <el-input v-model="tempFormData.tool_code" placeholder="如: TL-801" />
         </el-form-item>
 
-<<<<<<< HEAD
         <el-form-item label="绑定对应工位" prop="bound_station_code">
           <el-select v-model="tempFormData.bound_station_code" placeholder="请选择该工具所属的加工工位" style="width: 100%;" clearable>
-=======
-        <el-form-item label="工具名称" prop="tool_name">
-          <el-input v-model="tempFormData.tool_name" placeholder="如: 高级数字高精度定扭螺枪" />
-        </el-form-item>
-
-        <el-form-item label="绑定工位" prop="bound_station_code">
-          <el-select v-model="tempFormData.bound_station_code" placeholder="请选择绑定的工位" style="width: 100%;" clearable>
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
             <el-option
               v-for="station in stationOptions"
               :key="station.station_code"
@@ -188,11 +152,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-<<<<<<< HEAD
             <el-form-item label="责任人" prop="manager_name" label-width="70px">
-=======
-            <el-form-item label="负责人姓名" prop="manager_name">
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
               <el-input v-model="tempFormData.manager_name" placeholder="姓名" />
             </el-form-item>
           </el-col>
@@ -213,15 +173,9 @@
 
         <el-form-item label="工具状态">
           <el-radio-group v-model="tempFormData.status">
-<<<<<<< HEAD
             <el-radio-button :label="0">正常启用</el-radio-button>
             <el-radio-button :label="1">检测待校准</el-radio-button>
             <el-radio-button :label="2">故障停用</el-radio-button>
-=======
-            <el-radio-button :label="1">正常启用</el-radio-button>
-            <el-radio-button :label="2">检测待校准</el-radio-button>
-            <el-radio-button :label="0">故障停用</el-radio-button>
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -241,33 +195,6 @@ import { fetchStationList } from '@/api/station'
 
 export default {
   name: 'ToolManagement',
-<<<<<<< HEAD
-=======
-
-  components: {
-    Pagination
-  },
-
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        1: 'success',
-        2: 'warning',
-        0: 'danger'
-      }
-      return statusMap[status] || 'info'
-    },
-    statusText(status) {
-      const map = {
-        1: '正常启用',
-        2: '检测待校准',
-        0: '故障停用'
-      }
-      return map[status] || '未知'
-    }
-  },
-
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
   data() {
     return {
       listLoading: false,
@@ -279,26 +206,14 @@ export default {
         bound_station_code: '',
         status: ''
       },
-<<<<<<< HEAD
       total: 0,
       stationOptions: [],
-=======
-      stationOptions: [
-        { station_code: 'ST-001', station_name: '前桥装配工位' },
-        { station_code: 'ST-002', station_name: '减速器装配工位' },
-        { station_code: 'ST-003', station_name: '底盘检测工位' },
-        { station_code: 'ST-004', station_name: '缸盖气密检测' }
-      ],
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       toolList: [],
       dialogFormVisible: false,
       dialogStatus: '',
       editId: null,
       tempFormData: {
-<<<<<<< HEAD
         id: '',
-=======
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         tool_code: '',
         tool_name: '',
         bound_station_code: '',
@@ -306,25 +221,14 @@ export default {
         ip_address: '',
         manager_id: '',
         manager_name: '',
-<<<<<<< HEAD
         status: 0
-=======
-        description: '',
-        status: 1
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       },
       rules: {
         tool_code: [{ required: true, message: '工具编码为必填项', trigger: 'blur' }],
         tool_name: [{ required: true, message: '工具名称为必填项', trigger: 'blur' }],
-<<<<<<< HEAD
         bound_station_code: [{ required: true, message: '请绑定对应的加工工位', trigger: 'change' }],
         manager_id: [{ required: true, message: '责任人ID为必填项', trigger: 'blur' }],
         manager_name: [{ required: true, message: '责任人为必填项', trigger: 'blur' }],
-=======
-        bound_station_code: [{ required: true, message: '请选择绑定的工位', trigger: 'change' }],
-        manager_id: [{ required: true, message: '负责人工号为必填项', trigger: 'blur' }],
-        manager_name: [{ required: true, message: '负责人姓名为必填项', trigger: 'blur' }],
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         ip_address: [
           { required: true, message: '工具IP地址为必填项', trigger: 'blur' },
           { pattern: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/, message: '请输入合法的 IPv4 地址', trigger: 'blur' }
@@ -351,20 +255,13 @@ export default {
     getList() {
       this.listLoading = true
       fetchToolList(this.listQuery).then(response => {
-<<<<<<< HEAD
         this.toolList = response.data.items
         this.total = response.data.total
-=======
-        const data = response.data
-        this.total = data.total
-        this.toolList = data.items
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         this.listLoading = false
       }).catch(() => {
         this.listLoading = false
       })
     },
-<<<<<<< HEAD
     statusFilter(status) {
       const statusMap = {
         0: 'success',
@@ -381,9 +278,6 @@ export default {
       }
       return textMap[status] || '未知'
     },
-=======
-
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
@@ -396,10 +290,7 @@ export default {
 
     resetTempFormData() {
       this.tempFormData = {
-<<<<<<< HEAD
         id: '',
-=======
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         tool_code: '',
         tool_name: '',
         bound_station_code: '',
@@ -407,12 +298,7 @@ export default {
         ip_address: '',
         manager_id: '',
         manager_name: '',
-<<<<<<< HEAD
         status: 0
-=======
-        description: '',
-        status: 1
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       }
     },
 
@@ -438,10 +324,6 @@ export default {
             ip_address: this.tempFormData.ip_address,
             manager_id: this.tempFormData.manager_id,
             manager_name: this.tempFormData.manager_name,
-<<<<<<< HEAD
-=======
-            description: this.tempFormData.description,
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
             status: this.tempFormData.status
           }
           createTool(payload).then(() => {
@@ -486,16 +368,9 @@ export default {
             ip_address: this.tempFormData.ip_address,
             manager_id: this.tempFormData.manager_id,
             manager_name: this.tempFormData.manager_name,
-<<<<<<< HEAD
             status: this.tempFormData.status
           }
           updateTool(this.tempFormData.id, payload).then(() => {
-=======
-            description: this.tempFormData.description,
-            status: this.tempFormData.status
-          }
-          updateTool(this.editId, payload).then(() => {
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
             this.dialogFormVisible = false
             this.$message.success('工具修改成功')
             this.getList()
@@ -511,14 +386,7 @@ export default {
         type: 'warning'
       }).then(() => {
         deleteTool(row.id).then(() => {
-<<<<<<< HEAD
           this.$message.success('工具解绑并移除成功')
-=======
-          this.$message.success('工具删除成功')
-          if (this.listQuery.page > 1 && this.toolList.length === 1) {
-            this.listQuery.page--
-          }
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
           this.getList()
         })
       }).catch(() => {})

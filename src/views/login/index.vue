@@ -45,7 +45,6 @@
         </el-form-item>
       </el-tooltip>
 
-<<<<<<< HEAD
       <el-form-item prop="captcha_code" class="captcha-item">
         <span class="svg-container">
           <svg-icon icon-class="form" />
@@ -61,24 +60,6 @@
           @keyup.enter.native="handleLogin"
         />
         <div class="captcha-code-box" @click="refreshCaptcha">{{ captcha_text }}</div>
-=======
-      <el-form-item prop="captcha_code">
-        <div class="captcha-wrapper">
-          <span class="svg-container">
-            <svg-icon icon-class="skill" />
-          </span>
-          <el-input
-            v-model="loginForm.captcha_code"
-            placeholder="验证码"
-            name="captcha_code"
-            type="text"
-            tabindex="3"
-            autocomplete="off"
-            @keyup.enter.native="handleLogin"
-          />
-          <div class="captcha-code-box" @click="refreshCaptcha">{{ captcha_text }}</div>
-        </div>
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       </el-form-item>
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @keyup.enter.native="handleLogin" @click.native.prevent="handleLogin">登 录</el-button>
@@ -120,41 +101,23 @@ export default {
         callback()
       }
     }
-<<<<<<< HEAD
     const validateCaptcha = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入验证码'))
       } else if (value.length !== 4) {
         callback(new Error('验证码为4位'))
-=======
-    const captchaText = '8888'
-    const validateCaptcha = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入验证码'))
-      } else if (value !== captchaText) {
-        callback(new Error('验证码错误'))
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       } else {
         callback()
       }
     }
     return {
       loginForm: {
-<<<<<<< HEAD
         account: 'root',
-=======
-        username: 'root',
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         password: '88888888',
         captcha_code: ''
       },
-      captcha_text: captchaText,
       loginRules: {
-<<<<<<< HEAD
         account: [{ required: true, trigger: 'blur', validator: validateAccount }],
-=======
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         password: [{ required: true, trigger: 'blur', validator: validatePassword }],
         captcha_code: [{ required: true, trigger: 'blur', validator: validateCaptcha }]
       },
@@ -180,15 +143,11 @@ export default {
     }
   },
   created() {
-<<<<<<< HEAD
-=======
-    // window.addEventListener('storage', this.afterQRScan)
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
     this.refreshCaptcha()
   },
   mounted() {
-    if (this.loginForm.username === '') {
-      this.$refs.username.focus()
+    if (this.loginForm.account === '') {
+      this.$refs.account.focus()
     } else if (this.loginForm.password === '') {
       this.$refs.password.focus()
     }

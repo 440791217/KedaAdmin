@@ -22,11 +22,7 @@
 
       <el-input
         v-model="listQuery.manager_name"
-<<<<<<< HEAD
         placeholder="管理者姓名"
-=======
-        placeholder="负责人姓名"
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         style="width: 130px; margin-right: 10px;"
         class="filter-item"
         clearable
@@ -96,15 +92,11 @@
         </template>
       </el-table-column>
 
-<<<<<<< HEAD
       <el-table-column width="110px" align="center" label="管理者">
         <template slot-scope="scope">
           <span>{{ scope.row.manager_name }}</span>
         </template>
       </el-table-column>
-=======
-      <el-table-column width="110" align="center" label="负责人姓名" prop="manager_name" />
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
 
       <el-table-column width="110" align="center" label="分总成数量">
         <template slot-scope="scope">
@@ -162,25 +154,8 @@
         <el-form-item label="项目名称" prop="project_name">
           <el-input v-model="tempForm.project_name" placeholder="请输入项目名称" />
         </el-form-item>
-<<<<<<< HEAD
         <el-form-item label="管理者姓名">
           <el-input v-model="tempForm.manager_name" disabled placeholder="系统自动获取" />
-=======
-        <el-row :gutter="10">
-          <el-col :span="12">
-            <el-form-item label="负责人工号" prop="job_num">
-              <el-input v-model="tempForm.job_num" placeholder="工号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="负责人姓名" prop="manager_name">
-              <el-input v-model="tempForm.manager_name" placeholder="姓名" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="分总成数量" prop="sub_assembly_count">
-          <el-input-number v-model="tempForm.sub_assembly_count" :min="0" style="width: 100%;" />
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         </el-form-item>
         <el-form-item label="项目状态" prop="status">
           <el-radio-group v-model="tempForm.status">
@@ -246,34 +221,18 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-<<<<<<< HEAD
         project_id: undefined,
         project_name: undefined,
         manager_name: undefined,
         job_num: undefined,
-=======
-        project_id: '',
-        project_name: '',
-        manager_name: '',
-        job_num: '',
-        status: '',
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         sort: '-created_at'
       },
       dialogFormVisible: false,
       tempForm: {
         project_id: '',
         project_name: '',
-<<<<<<< HEAD
         manager_name: '',
         job_num: ''
-=======
-        job_num: '',
-        manager_name: '',
-        sub_assembly_count: 0,
-        status: 1,
-        description: ''
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       },
       rules: {
         project_id: [{ required: true, message: '项目编号不能为空', trigger: 'blur' }],
@@ -306,25 +265,12 @@ export default {
       this.tempForm = {
         project_id: '',
         project_name: '',
-<<<<<<< HEAD
         manager_name: '',
         job_num: ''
-=======
-        job_num: '',
-        manager_name: '',
-        sub_assembly_count: 0,
-        status: 1,
-        description: ''
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       }
     },
     handleCreate() {
       this.resetTempForm()
-<<<<<<< HEAD
-=======
-      this.editId = null
-      this.dialogStatus = 'create'
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
@@ -378,16 +324,12 @@ export default {
         }
       })
     },
-<<<<<<< HEAD
     handleEdit(row) {
       console.log('点击的行数据:', row)
       console.log('project_id:', row.project_id)
       this.$router.push(`/production_management/project/edit/${row.id}`)
     },
     handleDelete(row, index) {
-=======
-    handleDelete(row) {
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       this.$confirm(`确定要删除项目【${row.project_name}】吗?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

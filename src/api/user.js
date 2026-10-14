@@ -17,7 +17,6 @@ export function logout() {
   })
 }
 
-<<<<<<< HEAD
 export function getInfo() {
   return request({
     url: '/user/info',
@@ -25,9 +24,6 @@ export function getInfo() {
   })
 }
 
-=======
-// 用户列表
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
 export function fetchUserList(query) {
   return request({
     url: '/auth/user/list',
@@ -62,16 +58,9 @@ export function deleteUser(id) {
   })
 }
 
-<<<<<<< HEAD
 export function updateUserStatus(userId, status) {
   return request({
     url: `/auth/user/${userId}/status`,
-=======
-// 修改用户状态
-export function updateUserStatus(id, status) {
-  return request({
-    url: `/auth/user/${id}/status`,
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
     method: 'put',
     params: { status }
   })

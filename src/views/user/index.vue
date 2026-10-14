@@ -447,11 +447,7 @@ import {
   createUser as createUserApi,
   updateUser as updateUserApi,
   deleteUser as deleteUserApi,
-<<<<<<< HEAD
   updateUserStatus as updateUserStatusApi
-=======
-  updateUserStatus
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
 } from '@/api/user'
 
 export default {
@@ -569,7 +565,6 @@ export default {
     getList() {
       this.listLoading = true
 
-<<<<<<< HEAD
       fetchUserList({
         page: this.listQuery.page,
         limit: this.listQuery.limit,
@@ -579,9 +574,6 @@ export default {
         shift_group: this.listQuery.shiftGroup,
         status: this.listQuery.status
       }).then(response => {
-=======
-      fetchUserList(this.listQuery).then(response => {
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         const data = response.data
         this.total = data.total
         this.list = data.items
@@ -663,11 +655,7 @@ export default {
     },
 
     createUser() {
-<<<<<<< HEAD
-      createUserApi({
-=======
       const payload = {
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         username: this.tempForm.username,
         password: this.tempForm.password,
         real_name: this.tempForm.real_name,
@@ -732,7 +720,6 @@ export default {
           type: 'warning'
         }
       ).then(() => {
-<<<<<<< HEAD
         updateUserStatusApi(row.id, 0).then(() => {
           this.getList()
           this.$message.success('用户已禁用')
@@ -753,11 +740,6 @@ export default {
         updateUserStatusApi(row.id, 1).then(() => {
           this.getList()
           this.$message.success('用户已启用')
-=======
-        updateUserStatus(row.id, targetStatus).then(() => {
-          this.getList()
-          this.$message.success(`用户已${actionText}`)
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         })
       }).catch(() => {})
     },

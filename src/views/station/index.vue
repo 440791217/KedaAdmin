@@ -21,15 +21,9 @@
           @keyup.enter.native="handleFilter"
         />
         <el-select v-model="listQuery.status" placeholder="工位状态" clearable size="small" style="width: 120px;">
-<<<<<<< HEAD
           <el-option label="运行中" :value="0" />
           <el-option label="维护中" :value="1" />
           <el-option label="已停用" :value="2" />
-=======
-          <el-option label="运行中" :value="1" />
-          <el-option label="维护中" :value="2" />
-          <el-option label="已停用" :value="0" />
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         </el-select>
         <el-button type="primary" icon="el-icon-search" size="small" @click="handleFilter">搜索</el-button>
         <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
@@ -52,11 +46,7 @@
     >
       <el-table-column label="序号" type="index" align="center" width="60" />
 
-<<<<<<< HEAD
       <el-table-column label="工位编码" align="center" width="110">
-=======
-      <el-table-column label="工位编码" align="center" width="130">
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         <template slot-scope="{row}">
           <span class="code-text">{{ row.station_code }}</span>
         </template>
@@ -82,21 +72,12 @@
         </template>
       </el-table-column>
 
-<<<<<<< HEAD
       <el-table-column label="管理者" align="center" width="100" prop="manager_name" />
 
       <el-table-column label="状态" align="center" width="90">
         <template slot-scope="{row}">
           <el-tag :type="statusFilter(row.status)" size="small" effect="dark">
             {{ statusText(row.status) }}
-=======
-      <el-table-column label="管理者姓名" align="center" width="100" prop="manager_name" />
-
-      <el-table-column label="状态" align="center" width="90">
-        <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter" size="small" effect="dark">
-            {{ row.status | statusText }}
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
           </el-tag>
         </template>
       </el-table-column>
@@ -109,21 +90,13 @@
 
       <el-table-column label="创建时间" align="center" width="160">
         <template slot-scope="{row}">
-<<<<<<< HEAD
           <span>{{ row.created_at }}</span>
-=======
-          <span>{{ row.created_at | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         </template>
       </el-table-column>
 
       <el-table-column label="最近修改时间" align="center" width="160">
         <template slot-scope="{row}">
-<<<<<<< HEAD
           <span>{{ row.updated_at }}</span>
-=======
-          <span>{{ row.updated_at | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         </template>
       </el-table-column>
 
@@ -170,11 +143,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-<<<<<<< HEAD
             <el-form-item label="管理者" prop="manager_name" label-width="70px">
-=======
-            <el-form-item label="管理者姓名" prop="manager_name">
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
               <el-input v-model="tempFormData.manager_name" placeholder="姓名" />
             </el-form-item>
           </el-col>
@@ -195,15 +164,9 @@
 
         <el-form-item label="工位状态">
           <el-radio-group v-model="tempFormData.status">
-<<<<<<< HEAD
             <el-radio-button :label="0">运行中</el-radio-button>
             <el-radio-button :label="1">维护中</el-radio-button>
             <el-radio-button :label="2">已停用</el-radio-button>
-=======
-            <el-radio-button :label="1">运行中</el-radio-button>
-            <el-radio-button :label="2">维护中</el-radio-button>
-            <el-radio-button :label="0">已停用</el-radio-button>
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -222,33 +185,6 @@ import { fetchStationList, createStation, updateStation, deleteStation } from '@
 
 export default {
   name: 'StationManagement',
-<<<<<<< HEAD
-=======
-
-  components: {
-    Pagination
-  },
-
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        1: 'success',
-        2: 'warning',
-        0: 'danger'
-      }
-      return statusMap[status] || 'info'
-    },
-    statusText(status) {
-      const map = {
-        1: '运行中',
-        2: '维护中',
-        0: '已停用'
-      }
-      return map[status] || '未知'
-    }
-  },
-
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
   data() {
     return {
       listLoading: true,
@@ -265,34 +201,21 @@ export default {
       dialogStatus: '',
       editId: null,
       tempFormData: {
-<<<<<<< HEAD
         id: '',
-=======
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         station_code: '',
         station_name: '',
         location: '',
         ip_address: '',
         manager_id: '',
         manager_name: '',
-<<<<<<< HEAD
         status: 0
-=======
-        description: '',
-        status: 1
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       },
       rules: {
         station_code: [{ required: true, message: '工位编码为必填项', trigger: 'blur' }],
         station_name: [{ required: true, message: '工位名称为必填项', trigger: 'blur' }],
         location: [{ required: true, message: '物理地点为必填项', trigger: 'blur' }],
-<<<<<<< HEAD
         manager_id: [{ required: true, message: '管理者ID为必填项', trigger: 'blur' }],
         manager_name: [{ required: true, message: '负责人为必填项', trigger: 'blur' }],
-=======
-        manager_id: [{ required: true, message: '管理者工号为必填项', trigger: 'blur' }],
-        manager_name: [{ required: true, message: '管理者姓名为必填项', trigger: 'blur' }],
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         ip_address: [
           { required: true, message: 'IP地址为必填项', trigger: 'blur' },
           { pattern: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/, message: '请输入合法的 IPv4 地址', trigger: 'blur' }
@@ -309,7 +232,6 @@ export default {
     getList() {
       this.listLoading = true
       fetchStationList(this.listQuery).then(response => {
-<<<<<<< HEAD
         this.stationList = response.data.items
         this.listLoading = false
       })
@@ -330,17 +252,6 @@ export default {
       }
       return textMap[status] || '未知'
     },
-=======
-        const data = response.data
-        this.total = data.total
-        this.stationList = data.items
-        this.listLoading = false
-      }).catch(() => {
-        this.listLoading = false
-      })
-    },
-
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
@@ -353,22 +264,14 @@ export default {
 
     resetTempFormData() {
       this.tempFormData = {
-<<<<<<< HEAD
         id: '',
-=======
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
         station_code: '',
         station_name: '',
         location: '',
         ip_address: '',
         manager_id: '',
         manager_name: '',
-<<<<<<< HEAD
         status: 0
-=======
-        description: '',
-        status: 1
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
       }
     },
 
@@ -417,11 +320,7 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-<<<<<<< HEAD
           updateStation(this.tempFormData.id, this.tempFormData).then(() => {
-=======
-          updateStation(this.editId, this.tempFormData).then(() => {
->>>>>>> aa745ea7b370d320859df5a435ae272da2ddf599
             this.dialogFormVisible = false
             this.$message.success('工位修改成功')
             this.getList()
