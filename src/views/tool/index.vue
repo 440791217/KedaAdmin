@@ -11,18 +11,18 @@
           prefix-icon="el-icon-setting"
           @keyup.enter.native="handleFilter"
         />
-        <el-select v-model="listQuery.bound_station_id" placeholder="绑定工位" clearable size="small" style="width: 180px;">
+        <el-select v-model="listQuery.bound_station_code" placeholder="绑定工位" clearable size="small" style="width: 180px;">
           <el-option
             v-for="station in stationOptions"
-            :key="station.station_id"
+            :key="station.station_code"
             :label="station.station_name"
-            :value="station.station_id"
+            :value="station.station_code"
           />
         </el-select>
         <el-select v-model="listQuery.status" placeholder="工具状态" clearable size="small" style="width: 120px;">
-          <el-option label="正常启用" value="正常启用" />
-          <el-option label="检测待校准" value="检测待校准" />
-          <el-option label="故障停用" value="故障停用" />
+          <el-option label="正常启用" :value="0" />
+          <el-option label="检测待校准" :value="1" />
+          <el-option label="故障停用" :value="2" />
         </el-select>
         <el-button type="primary" icon="el-icon-search" size="small" @click="handleFilter">搜索</el-button>
         <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
@@ -45,9 +45,9 @@
     >
       <el-table-column label="序号" type="index" align="center" width="60" />
 
-      <el-table-column label="工具ID" align="center" width="110">
+      <el-table-column label="工具编码" align="center" width="110">
         <template slot-scope="{row}">
-          <span class="code-text">{{ row.tool_id }}</span>
+          <span class="code-text">{{ row.tool_code }}</span>
         </template>
       </el-table-column>
 
@@ -78,26 +78,24 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="责任人" align="center" width="100" prop="manager" />
+      <el-table-column label="责任人" align="center" width="100" prop="manager_name" />
 
       <el-table-column label="状态" align="center" width="100">
         <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter" size="small" effect="dark">
-            {{ row.status }}
+          <el-tag :type="statusFilter(row.status)" size="small" effect="dark">
+            {{ statusText(row.status) }}
           </el-tag>
         </template>
       </el-table-column>
 
       <el-table-column label="录入时间" align="center" width="160">
         <template slot-scope="{row}">
-          <!-- 时间一行显示，原为两行，后续可改回 -->
           <span>{{ row.created_at }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="最近校准时间" align="center" width="160">
         <template slot-scope="{row}">
-          <!-- 时间一行显示，原为两行，后续可改回 -->
           <span>{{ row.updated_at }}</span>
         </template>
       </el-table-column>
@@ -122,13 +120,13 @@
           <el-input v-model="tempFormData.tool_name" placeholder="如: 马头高级智能数字定扭矩电枪" />
         </el-form-item>
 
-        <el-form-item label="绑定对应工位" prop="bound_station_id">
-          <el-select v-model="tempFormData.bound_station_id" placeholder="请选择该工具所属的加工工位" style="width: 100%;" clearable>
+        <el-form-item label="绑定对应工位" prop="bound_station_code">
+          <el-select v-model="tempFormData.bound_station_code" placeholder="请选择该工具所属的加工工位" style="width: 100%;" clearable>
             <el-option
               v-for="station in stationOptions"
-              :key="station.station_id"
+              :key="station.station_code"
               :label="station.station_name"
-              :value="station.station_id"
+              :value="station.station_code"
             />
           </el-select>
         </el-form-item>
@@ -140,8 +138,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="责任人" prop="manager" label-width="70px">
-              <el-input v-model="tempFormData.manager" placeholder="姓名" />
+            <el-form-item label="责任人" prop="manager_name" label-width="70px">
+              <el-input v-model="tempFormData.manager_name" placeholder="姓名" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -152,9 +150,9 @@
 
         <el-form-item label="工具状态">
           <el-radio-group v-model="tempFormData.status">
-            <el-radio-button label="正常启用">正常启用</el-radio-button>
-            <el-radio-button label="检测待校准">检测待校准</el-radio-button>
-            <el-radio-button label="故障停用">故障停用</el-radio-button>
+            <el-radio-button :label="0">正常启用</el-radio-button>
+            <el-radio-button :label="1">检测待校准</el-radio-button>
+            <el-radio-button :label="2">故障停用</el-radio-button>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -169,19 +167,10 @@
 
 <script>
 import { fetchToolList, createTool, updateTool, deleteTool } from '@/api/tool'
+import { fetchStationList } from '@/api/station'
 
 export default {
   name: 'ToolManagement',
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        '正常启用': 'success',
-        '检测待校准': 'warning',
-        '故障停用': 'danger'
-      }
-      return statusMap[status] || 'info'
-    }
-  },
   data() {
     return {
       listLoading: false,
@@ -189,34 +178,30 @@ export default {
         page: 1,
         limit: 10,
         tool_name: '',
-        bound_station_id: '',
+        bound_station_code: '',
         status: ''
       },
       total: 0,
-      stationOptions: [
-        { station_id: 'ST-001', station_name: '前桥机器人精密压装工位' },
-        { station_id: 'ST-002', station_name: '数字智能扭矩螺栓拧紧工位' },
-        { station_id: 'ST-003', station_name: '气密性透气量综合测试工位' },
-        { station_id: 'ST-004', station_name: '成品形位公差视觉出厂检测' }
-      ],
+      stationOptions: [],
       toolList: [],
       dialogFormVisible: false,
       dialogStatus: '',
       tempFormData: {
-        tool_id: '',
+        id: '',
+        tool_code: '',
         tool_name: '',
-        bound_station_id: '',
+        bound_station_code: '',
         bound_station_name: '',
         ip_address: '',
         manager_id: '',
-        manager: '',
-        status: '正常启用'
+        manager_name: '',
+        status: 0
       },
       rules: {
         tool_name: [{ required: true, message: '工具名称为必填项', trigger: 'blur' }],
-        bound_station_id: [{ required: true, message: '请绑定对应的加工工位', trigger: 'change' }],
+        bound_station_code: [{ required: true, message: '请绑定对应的加工工位', trigger: 'change' }],
         manager_id: [{ required: true, message: '责任人ID为必填项', trigger: 'blur' }],
-        manager: [{ required: true, message: '责任人为必填项', trigger: 'blur' }],
+        manager_name: [{ required: true, message: '责任人为必填项', trigger: 'blur' }],
         ip_address: [
           { required: true, message: '工具IP地址为必填项', trigger: 'blur' },
           { pattern: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/, message: '请输入合法的 IPv4 地址', trigger: 'blur' }
@@ -226,36 +211,63 @@ export default {
   },
   created() {
     this.getList()
+    this.getStationOptions()
   },
   methods: {
+    getStationOptions() {
+      fetchStationList({ page: 1, limit: 100 }).then(response => {
+        const items = response.data.items || []
+        this.stationOptions = items.map(item => ({
+          station_code: item.station_code,
+          station_name: item.station_name
+        }))
+      }).catch(() => {})
+    },
     getList() {
       this.listLoading = true
       fetchToolList(this.listQuery).then(response => {
-        this.toolList = response.data.list
+        this.toolList = response.data.items
         this.total = response.data.total
         this.listLoading = false
       }).catch(() => {
         this.listLoading = false
       })
     },
+    statusFilter(status) {
+      const statusMap = {
+        0: 'success',
+        1: 'warning',
+        2: 'danger'
+      }
+      return statusMap[status] || 'info'
+    },
+    statusText(status) {
+      const textMap = {
+        0: '正常启用',
+        1: '检测待校准',
+        2: '故障停用'
+      }
+      return textMap[status] || '未知'
+    },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
     },
     resetQuery() {
-      this.listQuery = { page: 1, limit: 10, tool_name: '', bound_station_id: '', status: '' }
+      this.listQuery = { page: 1, limit: 10, tool_name: '', bound_station_code: '', status: '' }
       this.getList()
     },
     resetTempFormData() {
       this.tempFormData = {
-        tool_id: '',
+        id: '',
+        tool_code: '',
         tool_name: '',
-        bound_station_id: '',
+        bound_station_code: '',
         bound_station_name: '',
         ip_address: '',
         manager_id: '',
-        manager: '',
-        status: '正常启用'
+        manager_name: '',
+        status: 0
       }
     },
     handleCreate() {
@@ -269,14 +281,14 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const stationTarget = this.stationOptions.find(o => o.station_id === this.tempFormData.bound_station_id)
+          const stationTarget = this.stationOptions.find(o => o.station_code === this.tempFormData.bound_station_code)
           const payload = {
             tool_name: this.tempFormData.tool_name,
-            bound_station_id: this.tempFormData.bound_station_id,
+            bound_station_code: this.tempFormData.bound_station_code,
             bound_station_name: stationTarget ? stationTarget.station_name : '',
             ip_address: this.tempFormData.ip_address,
             manager_id: this.tempFormData.manager_id,
-            manager: this.tempFormData.manager,
+            manager_name: this.tempFormData.manager_name,
             status: this.tempFormData.status
           }
           createTool(payload).then(() => {
@@ -298,17 +310,17 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const stationTarget = this.stationOptions.find(o => o.station_id === this.tempFormData.bound_station_id)
+          const stationTarget = this.stationOptions.find(o => o.station_code === this.tempFormData.bound_station_code)
           const payload = {
             tool_name: this.tempFormData.tool_name,
-            bound_station_id: this.tempFormData.bound_station_id,
+            bound_station_code: this.tempFormData.bound_station_code,
             bound_station_name: stationTarget ? stationTarget.station_name : '',
             ip_address: this.tempFormData.ip_address,
             manager_id: this.tempFormData.manager_id,
-            manager: this.tempFormData.manager,
+            manager_name: this.tempFormData.manager_name,
             status: this.tempFormData.status
           }
-          updateTool(this.tempFormData.tool_id, payload).then(() => {
+          updateTool(this.tempFormData.id, payload).then(() => {
             this.dialogFormVisible = false
             this.$message.success('工具配置修改成功')
             this.getList()
@@ -322,7 +334,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteTool(row.tool_id).then(() => {
+        deleteTool(row.id).then(() => {
           this.$message.success('工具解绑并移除成功')
           this.getList()
         })

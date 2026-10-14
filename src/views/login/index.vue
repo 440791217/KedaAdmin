@@ -6,15 +6,15 @@
         <h3 class="title">SOP管理端</h3>
       </div>
 
-      <el-form-item prop="username">
+      <el-form-item prop="account">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
         <el-input
-          ref="username"
-          v-model="loginForm.username"
+          ref="account"
+          v-model="loginForm.account"
           placeholder="账号"
-          name="username"
+          name="account"
           type="text"
           tabindex="1"
           autocomplete="on"
@@ -45,21 +45,28 @@
         </el-form-item>
       </el-tooltip>
 
+      <el-form-item prop="captcha_code" class="captcha-item">
+        <span class="svg-container">
+          <svg-icon icon-class="form" />
+        </span>
+        <el-input
+          v-model="loginForm.captcha_code"
+          placeholder="验证码"
+          name="captcha_code"
+          type="text"
+          tabindex="3"
+          autocomplete="off"
+          maxlength="4"
+          @keyup.enter.native="handleLogin"
+        />
+        <div class="captcha-code-box" @click="refreshCaptcha">{{ captcha_text }}</div>
+      </el-form-item>
+
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @keyup.enter.native="handleLogin" @click.native.prevent="handleLogin">登 录</el-button>
 
       <div style="position:relative">
-        <div class="tips">
-          <!--          <span>Username : admin</span>-->
-          <!--          <span>Password : any</span>-->
-        </div>
-        <div class="tips">
-          <!--          <span style="margin-right:18px;">Username : editor</span>-->
-          <!--          <span>Password : any</span>-->
-        </div>
-
-        <!--        <el-button class="thirdparty-button" type="primary" @click="showDialog=true">-->
-        <!--          Or connect with-->
-        <!--        </el-button>-->
+        <div class="tips" />
+        <div class="tips" />
       </div>
     </el-form>
 
@@ -74,14 +81,13 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 
 export default {
   name: 'Login',
   components: { SocialSign },
   data() {
-    const validateUsername = (rule, value, callback) => {
+    const validateAccount = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入账号'))
       } else {
@@ -95,17 +101,29 @@ export default {
         callback()
       }
     }
+    const validateCaptcha = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入验证码'))
+      } else if (value.length !== 4) {
+        callback(new Error('验证码为4位'))
+      } else {
+        callback()
+      }
+    }
     return {
       loginForm: {
-        username: 'root',
-        password: '88888888'
+        account: 'root',
+        password: '88888888',
+        captcha_code: ''
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        account: [{ required: true, trigger: 'blur', validator: validateAccount }],
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+        captcha_code: [{ required: true, trigger: 'blur', validator: validateCaptcha }]
       },
       passwordType: 'password',
       capsTooltip: false,
+      captcha_text: '',
       loading: false,
       showDialog: false,
       redirect: undefined,
@@ -125,7 +143,7 @@ export default {
     }
   },
   created() {
-    // window.addEventListener('storage', this.afterQRScan)
+    this.refreshCaptcha()
   },
   mounted() {
     if (this.loginForm.account === '') {
@@ -135,7 +153,6 @@ export default {
     }
   },
   destroyed() {
-    // window.removeEventListener('storage', this.afterQRScan)
   },
   methods: {
     checkCapslock(e) {
@@ -153,12 +170,7 @@ export default {
       })
     },
     refreshCaptcha() {
-      // 生成 4 位随机数字验证码
-      let code = ''
-      for (let i = 0; i < 4; i++) {
-        code += Math.floor(Math.random() * 10)
-      }
-      this.captcha_text = code
+      this.captcha_text = '8888'
       this.loginForm.captcha_code = ''
     },
     handleLogin() {
@@ -187,32 +199,11 @@ export default {
         return acc
       }, {})
     }
-    // afterQRScan() {
-    //   if (e.key === 'x-admin-oauth-code') {
-    //     const code = getQueryObject(e.newValue)
-    //     const codeMap = {
-    //       wechat: 'code',
-    //       tencent: 'code'
-    //     }
-    //     const type = codeMap[this.auth_type]
-    //     const codeName = code[type]
-    //     if (codeName) {
-    //       this.$store.dispatch('LoginByThirdparty', codeName).then(() => {
-    //         this.$router.push({ path: this.redirect || '/' })
-    //       })
-    //     } else {
-    //       alert('第三方登录失败')
-    //     }
-    //   }
-    // }
   }
 }
 </script>
 
 <style lang="scss">
-/* 修复input 背景不协调 和光标变色 */
-/* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
-
 $bg:#283443;
 $light_gray:#fff;
 $cursor: #fff;
@@ -223,7 +214,6 @@ $cursor: #fff;
   }
 }
 
-/* reset element-ui css */
 .login-container {
   .el-input {
     display: inline-block;
@@ -318,33 +308,28 @@ $light_gray:#eee;
     user-select: none;
   }
 
-  .captcha-wrapper {
-    position: relative;
-    width: 85%;
-
+  .captcha-item {
     ::v-deep .el-input__inner {
       padding-right: 120px !important;
-      height: 42px;
-      line-height: 42px;
     }
-
     .captcha-code-box {
       position: absolute;
-      right: -66.5px;
+      right: 0;
       top: 0;
-      bottom: 0;
-      width: 110px;
-      line-height: 40px;
+      width: 120px;
+      height: 47px;
+      line-height: 47px;
       text-align: center;
       background: rgba(255, 255, 255, 0.08);
       border-left: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
-      font-size: 14px;
-      letter-spacing: 1px;
-      border-radius: 0 3px 3px 0;
+      font-size: 18px;
+      letter-spacing: 3px;
+      border-radius: 0 5px 5px 0;
       cursor: pointer;
       user-select: none;
       font-family: Arial, sans-serif;
+      font-weight: bold;
       box-sizing: border-box;
       z-index: 2;
     }

@@ -15,14 +15,12 @@ export function logout() {
   })
 }
 
-// 已废弃：登录接口已一次性返回用户信息，无需单独调用
-// export function getInfo(token) {
-//   return request({
-//     url: '/user/info',
-//     method: 'get',
-//     params: { token }
-//   })
-// }
+export function getInfo() {
+  return request({
+    url: '/user/info',
+    method: 'get'
+  })
+}
 
 export function fetchUserList(query) {
   return request({
@@ -55,16 +53,10 @@ export function deleteUser(userId) {
   })
 }
 
-export function disableUser(userId) {
+export function updateUserStatus(userId, status) {
   return request({
-    url: `/auth/user/${userId}/disable`,
-    method: 'put'
-  })
-}
-
-export function enableUser(userId) {
-  return request({
-    url: `/auth/user/${userId}/enable`,
-    method: 'put'
+    url: `/auth/user/${userId}/status`,
+    method: 'put',
+    params: { status }
   })
 }

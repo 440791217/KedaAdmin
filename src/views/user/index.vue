@@ -93,7 +93,7 @@
                 {{ scope.row.real_name }}
               </div>
               <div class="username">
-                {{ scope.row.user_name }}
+                {{ scope.row.username }}
               </div>
             </div>
           </div>
@@ -447,8 +447,7 @@ import {
   createUser as createUserApi,
   updateUser as updateUserApi,
   deleteUser as deleteUserApi,
-  disableUser as disableUserApi,
-  enableUser as enableUserApi
+  updateUserStatus as updateUserStatusApi
 } from '@/api/user'
 
 export default {
@@ -569,7 +568,7 @@ export default {
       fetchUserList({
         page: this.listQuery.page,
         limit: this.listQuery.limit,
-        user_name: this.listQuery.username,
+        username: this.listQuery.username,
         real_name: this.listQuery.realName,
         card_number: this.listQuery.cardNumber,
         shift_group: this.listQuery.shiftGroup,
@@ -577,7 +576,7 @@ export default {
       }).then(response => {
         const data = response.data
         this.total = data.total
-        this.list = data.list
+        this.list = data.items
         this.listLoading = false
       }).catch(() => {
         this.listLoading = false
@@ -604,10 +603,10 @@ export default {
 
     handleEdit(row) {
       this.dialogType = 'edit'
-      this.editUserId = row.user_id
+      this.editUserId = row.id
 
       this.tempForm = {
-        username: row.user_name,
+        username: row.username,
         password: '',
         confirmPassword: '',
         realName: row.real_name,
@@ -657,7 +656,7 @@ export default {
 
     createUser() {
       createUserApi({
-        user_name: this.tempForm.username,
+        username: this.tempForm.username,
         password: this.tempForm.password,
         real_name: this.tempForm.realName,
         card_number: this.tempForm.cardNumber,
@@ -716,7 +715,7 @@ export default {
           type: 'warning'
         }
       ).then(() => {
-        disableUserApi(row.user_id).then(() => {
+        updateUserStatusApi(row.id, 0).then(() => {
           this.getList()
           this.$message.success('用户已禁用')
         })
@@ -733,7 +732,7 @@ export default {
           type: 'info'
         }
       ).then(() => {
-        enableUserApi(row.user_id).then(() => {
+        updateUserStatusApi(row.id, 1).then(() => {
           this.getList()
           this.$message.success('用户已启用')
         })
@@ -750,7 +749,7 @@ export default {
           type: 'warning'
         }
       ).then(() => {
-        deleteUserApi(row.user_id).then(() => {
+        deleteUserApi(row.id).then(() => {
           if (
             this.listQuery.page > 1 &&
             this.list.length === 1

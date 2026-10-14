@@ -38,11 +38,18 @@ router.beforeEach(async(to, from, next) => {
           next()
         }
       } else {
-        // roles 为空，说明登录信息丢失，清除 token 重新登录
-        await store.dispatch('user/resetToken')
-        Message.error('登录状态已失效，请重新登录')
-        next(`/login?redirect=${to.path}`)
-        NProgress.done()
+        // roles 为空，调后端获取用户信息和角色
+        try {
+          const info = await store.dispatch('user/getInfo')
+          const accessRoutes = await store.dispatch('permission/generateRoutes', info.roles)
+          router.addRoutes(accessRoutes)
+          next({ ...to, replace: true })
+        } catch (error) {
+          await store.dispatch('user/resetToken')
+          Message.error(error || '登录状态已失效，请重新登录')
+          next(`/login?redirect=${to.path}`)
+          NProgress.done()
+        }
       }
     }
   } else {

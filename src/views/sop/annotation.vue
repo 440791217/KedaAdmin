@@ -519,64 +519,17 @@ export default {
 
   data() {
     return {
-      currentStation: 'station01',
-      currentSop: 'sop001',
-      currentStep: 'step01',
+      currentStation: '',
+      currentSop: '',
+      currentStep: '',
 
       toolMode: 'draw',
 
-      stationOptions: [
-        {
-          label: '1号装配工位',
-          value: 'station01'
-        },
-        {
-          label: '2号检测工位',
-          value: 'station02'
-        },
-        {
-          label: '3号包装工位',
-          value: 'station03'
-        }
-      ],
+      stationOptions: [],
 
-      sopOptions: [
-        {
-          label: 'SOP-001 产品装配',
-          value: 'sop001'
-        },
-        {
-          label: 'SOP-002 外观检测',
-          value: 'sop002'
-        }
-      ],
+      sopOptions: [],
 
-      stepOptions: [
-        {
-          value: 'step01',
-          label: '步骤1：放置工件',
-          name: '放置工件',
-          desc: '将工件放置于定位区域'
-        },
-        {
-          value: 'step02',
-          label: '步骤2：安装零件',
-          name: '安装零件',
-          desc: '安装左右两侧连接件'
-        },
-        {
-          value: 'step03',
-          label: '步骤3：锁紧螺丝',
-          name: '锁紧螺丝',
-          desc: '依次锁紧四颗固定螺丝'
-        },
-        {
-          value: 'step04',
-          label: '步骤4：标签检查',
-          name: '标签检查',
-          desc: '确认产品标签粘贴正确'
-        }
-      ],
+      stepOptions: [],
 
       colors: [
         '#409EFF',
@@ -587,38 +540,9 @@ export default {
         '#00B8A9'
       ],
 
-      regions: [
-        {
-          id: 1,
-          name: '产品主体区域',
-          detectType: 'object',
-          className: 'workpiece',
-          confidence: 80,
-          expectedCount: 1,
-          enabled: true,
-          color: '#409EFF',
-          x: 28,
-          y: 26,
-          width: 44,
-          height: 48
-        },
-        {
-          id: 2,
-          name: '标签检测区域',
-          detectType: 'object',
-          className: 'label',
-          confidence: 75,
-          expectedCount: 1,
-          enabled: true,
-          color: '#67C23A',
-          x: 41,
-          y: 42,
-          width: 18,
-          height: 13
-        }
-      ],
+      regions: [],
 
-      selectedRegionId: 1,
+      selectedRegionId: null,
 
       isDrawing: false,
       drawingRect: null,
@@ -632,7 +556,7 @@ export default {
       dragOriginalX: 0,
       dragOriginalY: 0,
 
-      regionSeed: 3
+      regionSeed: 0
     }
   },
 

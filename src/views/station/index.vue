@@ -21,9 +21,9 @@
           @keyup.enter.native="handleFilter"
         />
         <el-select v-model="listQuery.status" placeholder="工位状态" clearable size="small" style="width: 120px;">
-          <el-option label="运行中" value="运行中" />
-          <el-option label="维护中" value="维护中" />
-          <el-option label="已停用" value="已停用" />
+          <el-option label="运行中" :value="0" />
+          <el-option label="维护中" :value="1" />
+          <el-option label="已停用" :value="2" />
         </el-select>
         <el-button type="primary" icon="el-icon-search" size="small" @click="handleFilter">搜索</el-button>
         <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
@@ -46,9 +46,9 @@
     >
       <el-table-column label="序号" type="index" align="center" width="60" />
 
-      <el-table-column label="工位ID" align="center" width="110">
+      <el-table-column label="工位编码" align="center" width="110">
         <template slot-scope="{row}">
-          <span class="code-text">{{ row.station_id }}</span>
+          <span class="code-text">{{ row.station_code }}</span>
         </template>
       </el-table-column>
 
@@ -72,26 +72,24 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="管理者" align="center" width="100" prop="manager" />
+      <el-table-column label="管理者" align="center" width="100" prop="manager_name" />
 
       <el-table-column label="状态" align="center" width="90">
         <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter" size="small" effect="dark">
-            {{ row.status }}
+          <el-tag :type="statusFilter(row.status)" size="small" effect="dark">
+            {{ statusText(row.status) }}
           </el-tag>
         </template>
       </el-table-column>
 
       <el-table-column label="创建时间" align="center" width="160">
         <template slot-scope="{row}">
-          <!-- 时间一行显示，原为两行，后续可改回 -->
           <span>{{ row.created_at }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="最近修改时间" align="center" width="160">
         <template slot-scope="{row}">
-          <!-- 时间一行显示，原为两行，后续可改回 -->
           <span>{{ row.updated_at }}</span>
         </template>
       </el-table-column>
@@ -127,8 +125,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="管理者" prop="manager" label-width="70px">
-              <el-input v-model="tempFormData.manager" placeholder="姓名" />
+            <el-form-item label="管理者" prop="manager_name" label-width="70px">
+              <el-input v-model="tempFormData.manager_name" placeholder="姓名" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -139,9 +137,9 @@
 
         <el-form-item label="工位状态">
           <el-radio-group v-model="tempFormData.status">
-            <el-radio-button label="运行中">运行中</el-radio-button>
-            <el-radio-button label="维护中">维护中</el-radio-button>
-            <el-radio-button label="已停用">已停用</el-radio-button>
+            <el-radio-button :label="0">运行中</el-radio-button>
+            <el-radio-button :label="1">维护中</el-radio-button>
+            <el-radio-button :label="2">已停用</el-radio-button>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -159,16 +157,6 @@ import { fetchStationList, createStation, updateStation, deleteStation } from '@
 
 export default {
   name: 'StationManagement',
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        '运行中': 'success',
-        '维护中': 'warning',
-        '已停用': 'danger'
-      }
-      return statusMap[status] || 'info'
-    }
-  },
   data() {
     return {
       listLoading: true,
@@ -181,19 +169,20 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       tempFormData: {
-        station_id: '',
+        id: '',
+        station_code: '',
         station_name: '',
         location: '',
         ip_address: '',
         manager_id: '',
-        manager: '',
-        status: '运行中'
+        manager_name: '',
+        status: 0
       },
       rules: {
         station_name: [{ required: true, message: '工位名称为必填项', trigger: 'blur' }],
         location: [{ required: true, message: '物理地点为必填项', trigger: 'blur' }],
         manager_id: [{ required: true, message: '管理者ID为必填项', trigger: 'blur' }],
-        manager: [{ required: true, message: '负责人为必填项', trigger: 'blur' }],
+        manager_name: [{ required: true, message: '负责人为必填项', trigger: 'blur' }],
         ip_address: [
           { required: true, message: 'IP地址为必填项', trigger: 'blur' },
           { pattern: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/, message: '请输入合法的 IPv4 地址', trigger: 'blur' }
@@ -208,9 +197,25 @@ export default {
     getList() {
       this.listLoading = true
       fetchStationList(this.listQuery).then(response => {
-        this.stationList = response.data.list
+        this.stationList = response.data.items
         this.listLoading = false
       })
+    },
+    statusFilter(status) {
+      const statusMap = {
+        0: 'success',
+        1: 'warning',
+        2: 'danger'
+      }
+      return statusMap[status] || 'info'
+    },
+    statusText(status) {
+      const textMap = {
+        0: '运行中',
+        1: '维护中',
+        2: '已停用'
+      }
+      return textMap[status] || '未知'
     },
     handleFilter() {
       this.getList()
@@ -221,13 +226,14 @@ export default {
     },
     resetTempFormData() {
       this.tempFormData = {
-        station_id: '',
+        id: '',
+        station_code: '',
         station_name: '',
         location: '',
         ip_address: '',
         manager_id: '',
-        manager: '',
-        status: '运行中'
+        manager_name: '',
+        status: 0
       }
     },
     handleCreate() {
@@ -260,7 +266,7 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          updateStation(this.tempFormData.station_id, this.tempFormData).then(() => {
+          updateStation(this.tempFormData.id, this.tempFormData).then(() => {
             this.dialogFormVisible = false
             this.$message.success('工位参数修改成功')
             this.getList()
@@ -274,7 +280,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteStation(row.station_id).then(() => {
+        deleteStation(row.id).then(() => {
           this.$message.success('工位删除成功')
           this.getList()
         })

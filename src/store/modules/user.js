@@ -1,4 +1,4 @@
-import { login, logout } from '@/api/user'
+import { login, logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
@@ -7,7 +7,6 @@ const state = {
   user_id: '',
   user_name: '',
   avatar: '',
-  gender: '',
   roles: [],
   access_token: '',
   refresh_token: '',
@@ -28,9 +27,6 @@ const mutations = {
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   },
-  SET_GENDER: (state, gender) => {
-    state.gender = gender
-  },
   SET_ROLES: (state, roles) => {
     state.roles = roles
   },
@@ -49,7 +45,6 @@ const mutations = {
 }
 
 const actions = {
-  // user login
   login({ commit }, userInfo) {
     const { account, password, login_type, captcha_code } = userInfo
     return new Promise((resolve, reject) => {
@@ -62,7 +57,6 @@ const actions = {
         const { data } = response
         const user_info = data.user_info || {}
 
-        // 保存 token
         const token = user_info.access_token
         commit('SET_TOKEN', token)
         commit('SET_ACCESS_TOKEN', user_info.access_token)
@@ -71,10 +65,8 @@ const actions = {
         commit('SET_EXPIRES_IN', user_info.expires_in)
         setToken(token)
 
-        // 保存用户信息
-        commit('SET_USER_ID', data.user_id)
+        commit('SET_USER_ID', data.id)
         commit('SET_USER_NAME', data.user_name)
-        commit('SET_GENDER', data.gender)
         commit('SET_ROLES', user_info.roles || [])
         commit('SET_AVATAR', 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif')
 
@@ -85,22 +77,26 @@ const actions = {
     })
   },
 
-  // get user info（已废弃，登录时已一次性返回）
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      if (state.roles && state.roles.length > 0) {
-        resolve({
-          roles: state.roles,
-          user_name: state.user_name,
-          avatar: state.avatar
-        })
-      } else {
-        reject('请先登录')
-      }
+      getInfo().then(response => {
+        const { data } = response
+        const roles = data.roles || []
+        if (!roles || roles.length === 0) {
+          reject('该用户未分配角色')
+          return
+        }
+        commit('SET_ROLES', roles)
+        commit('SET_USER_ID', data.id)
+        commit('SET_USER_NAME', data.user_name)
+        commit('SET_AVATAR', data.avatar_url || 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif')
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
     })
   },
 
-  // user logout
   logout({ commit, state, dispatch }) {
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
@@ -113,7 +109,6 @@ const actions = {
         removeToken()
         resetRouter()
 
-        // reset visited views and cached views
         dispatch('tagsView/delAllViews', null, { root: true })
 
         resolve()
@@ -123,7 +118,6 @@ const actions = {
     })
   },
 
-  // remove token
   resetToken({ commit }) {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
@@ -133,7 +127,6 @@ const actions = {
     })
   },
 
-  // dynamically modify permissions
   async changeRoles({ commit, dispatch }, role) {
     const token = role + '-token'
 
@@ -145,12 +138,9 @@ const actions = {
 
     resetRouter()
 
-    // generate accessible routes map based on roles
     const accessRoutes = await dispatch('permission/generateRoutes', roles, { root: true })
-    // dynamically add accessible routes
     router.addRoutes(accessRoutes)
 
-    // reset visited views and cached views
     dispatch('tagsView/delAllViews', null, { root: true })
   }
 }

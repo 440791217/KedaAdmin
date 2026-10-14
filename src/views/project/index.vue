@@ -21,7 +21,7 @@
       />
 
       <el-input
-        v-model="listQuery.manager"
+        v-model="listQuery.manager_name"
         placeholder="管理者姓名"
         style="width: 130px; margin-right: 10px;"
         class="filter-item"
@@ -82,7 +82,7 @@
 
       <el-table-column width="110px" align="center" label="管理者">
         <template slot-scope="scope">
-          <span>{{ scope.row.manager }}</span>
+          <span>{{ scope.row.manager_name }}</span>
         </template>
       </el-table-column>
 
@@ -94,14 +94,12 @@
 
       <el-table-column width="160px" align="center" label="创建时间" prop="created_at" sortable="custom">
         <template slot-scope="scope">
-          <!-- 时间一行显示，原为两行，后续可改回 -->
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
 
       <el-table-column width="160px" align="center" label="最近修改时间" prop="updated_at" sortable="custom">
         <template slot-scope="scope">
-          <!-- 时间一行显示，原为两行，后续可改回 -->
           <span>{{ scope.row.updated_at | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
@@ -131,7 +129,7 @@
           <el-input v-model="tempForm.project_name" placeholder="请输入项目名称" />
         </el-form-item>
         <el-form-item label="管理者姓名">
-          <el-input v-model="tempForm.manager" disabled placeholder="系统自动获取" />
+          <el-input v-model="tempForm.manager_name" disabled placeholder="系统自动获取" />
         </el-form-item>
         <el-form-item label="管理者工号">
           <el-input v-model="tempForm.job_num" disabled placeholder="系统自动获取" />
@@ -163,7 +161,7 @@ export default {
         limit: 20,
         project_id: undefined,
         project_name: undefined,
-        manager: undefined,
+        manager_name: undefined,
         job_num: undefined,
         sort: '-created_at'
       },
@@ -171,7 +169,7 @@ export default {
       tempForm: {
         project_id: '',
         project_name: '',
-        manager: '',
+        manager_name: '',
         job_num: ''
       },
       rules: {
@@ -202,14 +200,12 @@ export default {
       this.tempForm = {
         project_id: '',
         project_name: '',
-        manager: '',
+        manager_name: '',
         job_num: ''
       }
     },
     handleCreate() {
       this.resetTempForm()
-      this.tempForm.manager = '张兵'
-      this.tempForm.job_num = 'KD-0842'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
@@ -236,7 +232,7 @@ export default {
     handleEdit(row) {
       console.log('点击的行数据:', row)
       console.log('project_id:', row.project_id)
-      this.$router.push(`/production_management/project/edit/${row.project_id}`)
+      this.$router.push(`/production_management/project/edit/${row.id}`)
     },
     handleDelete(row, index) {
       this.$confirm(`确定要删除项目【${row.project_name}】吗?`, '提示', {
@@ -244,7 +240,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteProject(row.project_id).then(() => {
+        deleteProject(row.id).then(() => {
           this.$message({
             type: 'success',
             message: '删除成功!'
