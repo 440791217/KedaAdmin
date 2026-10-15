@@ -1,0 +1,38 @@
+
+.sop-step-dialog {
+  max-width: calc(100vw - 32px);
+
+  .step-unit { margin-left: 10px; }
+  .step-form-hint { color: #909399; font-size: 12px; line-height: 22px; }
+  .step-guide-image {
+    margin-top: 10px;
+    .el-image { display: block; width: 100%; height: 150px; background: #f5f7fa; border-radius: 4px; }
+  }
+  .el-dialog__header {
+    padding: 20px 24px 15px;
+    border-bottom: 1px solid #ebeef5;
+  }
+
+  .el-dialog__title {
+    color: #303133;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .el-dialog__body {
+    padding: 25px 24px 10px;
+  }
+
+  .el-dialog__footer {
+    padding: 15px 24px 20px;
+    border-top: 1px solid #ebeef5;
+  }
+
+  .el-form-item {
+    margin-bottom: 20px;
+  }
+
+  .el-textarea__inner {
+    resize: vertical;
+  }
+}

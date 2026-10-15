@@ -1,0 +1,80 @@
+
+.roi-box {
+  position: absolute;
+  z-index: 10;
+  border: 2px solid #409EFF;
+  background: rgba(64, 158, 255, 0.04);
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.roi-box:hover {
+  background: rgba(64, 158, 255, 0.08);
+}
+
+.roi-box.selected {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.roi-label {
+  position: absolute;
+  left: -2px;
+  top: -25px;
+  height: 23px;
+  padding: 0 8px;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 23px;
+  white-space: nowrap;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #ffffff;
+  border: 2px solid #409EFF;
+  box-sizing: border-box;
+}
+
+.handle-nw {
+  left: -5px;
+  top: -5px;
+  cursor: nwse-resize;
+}
+
+.handle-ne {
+  right: -5px;
+  top: -5px;
+  cursor: nesw-resize;
+}
+
+.handle-sw {
+  left: -5px;
+  bottom: -5px;
+  cursor: nesw-resize;
+}
+
+.handle-se {
+  right: -5px;
+  bottom: -5px;
+  cursor: nwse-resize;
+}
+
+.drawing-box {
+  position: absolute;
+  z-index: 20;
+  border: 2px dashed #409EFF;
+  background: rgba(64, 158, 255, 0.15);
+  box-sizing: border-box;
+}
+
+.drawing-size {
+  position: absolute;
+  right: 0;
+  bottom: -22px;
+  padding: 2px 5px;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.65);
+  font-size: 10px;
+}

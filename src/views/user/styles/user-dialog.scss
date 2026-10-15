@@ -1,0 +1,22 @@
+.card-input {
+  display: flex;
+  align-items: center;
+}
+
+.card-input .el-input {
+  flex: 1;
+}
+
+.card-input .el-button {
+  margin-left: 10px;
+}
+
+.form-tip {
+  color: #909399;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.user-select {
+  width: 100%;
+}

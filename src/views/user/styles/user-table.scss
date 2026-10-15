@@ -1,0 +1,63 @@
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+}
+
+.user-info-text {
+  margin-left: 12px;
+  text-align: left;
+}
+
+.real-name {
+  color: #303133;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.username {
+  color: #909399;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.empty-text {
+  color: #c0c4cc;
+}
+
+.operation-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.op-btn {
+  width: 100px;
+  margin-left: 0 !important;
+}
+
+.time-column-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+
+.time-date {
+  color: #303133;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.time-clock {
+  color: #909399;
+  font-size: 11px;
+  font-family: monospace;
+}
+
+.user-table {
+  width: 100%;
+  margin-top: 20px;
+}

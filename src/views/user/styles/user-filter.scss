@@ -1,0 +1,13 @@
+.filter-container {
+  margin-bottom: 20px;
+}
+
+.filter-container {
+  .filter-username, .filter-standard, .filter-card, .filter-status {
+    margin-right: 10px;
+  }
+  .filter-username { width: 150px; }
+  .filter-standard { width: 130px; }
+  .filter-card { width: 160px; }
+  .filter-status { width: 120px; }
+}

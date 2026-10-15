@@ -1,0 +1,88 @@
+
+.canvas-toolbar {
+  flex-shrink: 0;
+  height: 50px;
+  padding: 0 15px;
+  border-bottom: 1px solid #ebeef5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.canvas-title {
+  color: #303133;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  background: #67C23A;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(103, 194, 58, 0.15);
+}
+
+.canvas-container {
+  flex: 1;
+  min-height: 0;
+  padding: 18px;
+  background: #eef1f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  max-height: 100%;
+  aspect-ratio: 16 / 9;
+  background: #20252b;
+  overflow: hidden;
+  user-select: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stage.draw-mode {
+  cursor: crosshair;
+}
+
+.stage.select-mode {
+  cursor: default;
+}
+
+.canvas-help {
+  position: absolute;
+  left: 50%;
+  bottom: 15px;
+  z-index: 30;
+  transform: translateX(-50%);
+  padding: 7px 13px;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 3px;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.canvas-help i {
+  margin-right: 5px;
+}
+
+.canvas-footer {
+  flex-shrink: 0;
+  height: 38px;
+  padding: 0 15px;
+  border-top: 1px solid #ebeef5;
+  color: #909399;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  box-sizing: border-box;
+}

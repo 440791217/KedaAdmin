@@ -97,7 +97,7 @@ export const constantRoutes = [
       },
       {
         path: 'test',
-        component: () => import('@/views/user/insert'),
+        component: () => import('@/views/user/insert/index'),
         name: 'Test',
         meta: { title: '测试' }
       },
@@ -106,6 +106,20 @@ export const constantRoutes = [
         component: () => import('@/views/sop/annotation'),
         name: 'annotation',
         meta: { title: 'annotation' }
+      }
+    ]
+  },
+  {
+    path: '/sop_demo',
+    component: Layout,
+    redirect: '/sop_demo/',
+    meta: { title: 'SOP演示' },
+    children: [
+      {
+        path: 'annotation',
+        component: () => import('@/views/sop/annotation/index'),
+        name: 'SOP-Ananottation',
+        meta: { title: 'SOP标注' }
       }
     ]
   },
@@ -123,14 +137,14 @@ export const constantRoutes = [
       },
       {
         path: 'project/edit/:id(\\d+)',
-        component: () => import('@/views/project/edit'),
+        component: () => import('@/views/project/edit/index'),
         name: 'ProjectEdit',
         meta: { title: '项目详情' },
         hidden: true
       },
       {
         path: 'project/process/:assemblyId',
-        component: () => import('@/views/project/process'),
+        component: () => import('@/views/project/process/index'),
         name: 'AssemblyProcess',
         meta: { title: '工序配置' },
         hidden: true
