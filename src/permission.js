@@ -1,72 +1,50 @@
 import router from './router'
 import store from './store'
 import { Message } from 'element-ui'
-import NProgress from 'nprogress' // progress bar
-import 'nprogress/nprogress.css' // progress bar style
-import { getToken } from '@/utils/auth' // get token from cookie
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+import { getToken } from '@/utils/auth'
 import getPageTitle from '@/utils/get-page-title'
 
-NProgress.configure({ showSpinner: false }) // NProgress Configuration
-
-const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
+NProgress.configure({ showSpinner: false })
+const whiteList = ['/login', '/auth-redirect']
 
 router.beforeEach(async(to, from, next) => {
-  // start progress bar
   NProgress.start()
-
-  // set page title
   document.title = getPageTitle(to.meta.title)
-
-  // determine whether the user has logged in
-  const hasToken = getToken()
-
-  if (hasToken) {
-    if (to.path === '/login') {
-      // if is logged in, redirect to the home page
-      next({ path: '/' })
-      NProgress.done() // hack: https://github.com/PanJiaChen/vue-element-admin/pull/2939
-    } else {
-      // determine whether the user has obtained his permission roles
-      const hasRoles = store.getters.roles && store.getters.roles.length > 0
-      if (hasRoles) {
-        // 路由如果还没生成，先生成动态路由
-        if (!store.getters.addRoutes || store.getters.addRoutes.length === 0) {
-          const accessRoutes = await store.dispatch('permission/generateRoutes', store.getters.roles)
-          router.addRoutes(accessRoutes)
-          next({ ...to, replace: true })
-        } else {
-          next()
-        }
-      } else {
-        // roles 为空，调后端获取用户信息和角色
-        try {
-          const info = await store.dispatch('user/getInfo')
-          const accessRoutes = await store.dispatch('permission/generateRoutes', info.roles)
-          router.addRoutes(accessRoutes)
-          next({ ...to, replace: true })
-        } catch (error) {
-          await store.dispatch('user/resetToken')
-          Message.error(error || '登录状态已失效，请重新登录')
-          next(`/login?redirect=${to.path}`)
-          NProgress.done()
-        }
-      }
-    }
-  } else {
-    /* has no token*/
-
-    if (whiteList.indexOf(to.path) !== -1) {
-      // in the free login whitelist, go directly
+  if (!getToken()) {
+    if (whiteList.includes(to.path)) {
       next()
     } else {
-      // other pages that do not have permission to access are redirected to the login page.
-      next(`/login?redirect=${to.path}`)
+      next({ path: '/login', query: { redirect: to.fullPath }})
       NProgress.done()
     }
+    return
+  }
+  try {
+    if (!store.getters.user_loaded) await store.dispatch('user/getInfo')
+    if (store.getters.must_change_password && to.path !== '/change-password') {
+      next('/change-password')
+      NProgress.done()
+      return
+    }
+    if (to.path === '/login') {
+      next('/')
+      NProgress.done()
+      return
+    }
+    if (!store.getters.routes_ready) {
+      const routes = await store.dispatch('permission/generateRoutes', store.getters.roles)
+      router.addRoutes(routes)
+      next({ ...to, replace: true })
+    } else {
+      next()
+    }
+  } catch (error) {
+    await store.dispatch('user/resetToken')
+    if (!error.reported) Message.error(error.message || '登录状态已失效，请重新登录')
+    next({ path: '/login', query: { redirect: to.fullPath }})
+    NProgress.done()
   }
 })
-
-router.afterEach(() => {
-  // finish progress bar
-  NProgress.done()
-})
+router.afterEach(() => NProgress.done())

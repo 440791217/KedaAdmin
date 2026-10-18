@@ -1,6 +1,10 @@
 import { parseTime } from '@/utils/index.js'
 
 describe('Utils:parseTime', () => {
+  it('preserves ISO UTC timestamps returned by the backend', () => {
+    const iso = '2026-10-16T00:00:00.000Z'
+    expect(parseTime(iso)).toBe(parseTime(new Date(iso)))
+  })
   const d = new Date('2018-07-13 17:54:01') // "2018-07-13 17:54:01"
   it('timestamp', () => {
     expect(parseTime(d)).toBe('2018-07-13 17:54:01')

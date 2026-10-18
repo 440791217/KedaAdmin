@@ -52,13 +52,19 @@ export const constantRoutes = [
   },
   {
     path: '/login',
-    component: () => import('@/views/login/index'),
+    component: () => import('@/views/user/login/index'),
     hidden: true
   },
   {
     path: '/auth-redirect',
-    component: () => import('@/views/login/auth-redirect'),
+    component: () => import('@/views/user/auth_redirect/index.vue'),
     hidden: true
+  },
+  {
+    path: '/change-password',
+    component: () => import('@/views/user/change_password/index.vue'),
+    hidden: true,
+    meta: { title: '修改密码' }
   },
   {
     path: '/404',
@@ -91,77 +97,108 @@ export const constantRoutes = [
     children: [
       {
         path: 'user',
-        component: () => import('@/views/user/index'),
+        component: () => import('@/views/user/management/index'),
         name: 'UserManagement',
         meta: { title: '用户管理' }
-      },
-      {
-        path: 'test',
-        component: () => import('@/views/user/insert/index'),
-        name: 'Test',
-        meta: { title: '测试' }
-      },
-      {
-        path: 'sop',
-        component: () => import('@/views/sop/annotation'),
-        name: 'annotation',
-        meta: { title: 'annotation' }
       }
+      // {
+      //   path: 'test',
+      //   component: () => import('@/views/user/insert/index'),
+      //   name: 'Test',
+      //   meta: { title: '测试' }
+      // },
+      // {
+      //   path: 'sop',
+      //   component: () => import('@/views/sop/annotation'),
+      //   name: 'annotation',
+      //   meta: { title: 'annotation' }
+      // }
     ]
   },
   {
-    path: '/sop_demo',
+    path: '/sop',
+    hidden: true,
     component: Layout,
-    redirect: '/sop_demo/',
-    meta: { title: 'SOP演示' },
+    redirect: '/sop/list',
+    meta: { title: 'SOP管理' },
     children: [
-      {
-        path: 'annotation',
-        component: () => import('@/views/sop/annotation/index'),
-        name: 'SOP-Ananottation',
-        meta: { title: 'SOP标注' }
-      }
+      { path: 'list', component: () => import('@/views/sop/list/index'), name: 'SopManagement', meta: { title: 'SOP标准库', noCache: true }},
+      { path: 'preview', component: () => import('@/views/sop/preview/index'), name: 'BoundSopPreview', hidden: true, meta: { title: '标准查看', noCache: true, activeMenu: '/project/list' }},
+      { path: ':sopId(\\d+)', component: () => import('@/views/sop/detail/index'), name: 'SopDetail', hidden: true, meta: { title: 'SOP版本', noCache: true, activeMenu: '/project/list' }},
+      { path: ':sopId(\\d+)/version/:revisionId(\\d+)/edit', component: () => import('@/views/sop/editor/index'), name: 'SopEditor', hidden: true, meta: { title: '制作SOP', noCache: true, activeMenu: '/project/list' }},
+      { path: ':sopId(\\d+)/version/:revisionId(\\d+)/preview', component: () => import('@/views/sop/preview/index'), name: 'SopPreview', hidden: true, meta: { title: 'SOP预览', noCache: true, activeMenu: '/project/list' }}
     ]
+  },
+  // 旧标注入口统一回到 SOP 管理，图文与标注在正式版本制作页完成。
+  { path: '/sop_demo', redirect: '/sop/list', hidden: true },
+  { path: '/sop_demo/annotation', alias: '/sop/annotation', name: 'SOP-Ananottation', redirect: '/sop/list', hidden: true },
+  {
+    path: '/project',
+    component: Layout,
+    redirect: '/project/list',
+    meta: { title: '项目管理' },
+    children: [
+      { path: 'list', component: () => import('@/views/project/list/index'), name: 'ProjectManagement', meta: { title: '项目列表', noCache: true }},
+      { path: ':projectId(\\d+)/subproject/:subprojectId(\\d+)/task/new', component: () => import('@/views/project/task/index'), name: 'SopTaskCreate', hidden: true, meta: { title: '新建SOP任务', noCache: true, activeMenu: '/project/list' }},
+      { path: ':projectId(\\d+)/subproject/:subprojectId(\\d+)/task/:taskId(\\d+)', component: () => import('@/views/project/task/index'), name: 'SopTaskWork', hidden: true, meta: { title: 'SOP任务', noCache: true, activeMenu: '/project/list' }},
+      { path: ':projectId(\\d+)', component: () => import('@/views/project/detail/index'), name: 'ProjectDetail', hidden: true, meta: { title: '项目详情', noCache: true, activeMenu: '/project/list' }},
+      { path: ':projectId(\\d+)/subproject/:subprojectId(\\d+)', component: () => import('@/views/project/detail/index'), name: 'SubprojectDetail', hidden: true, meta: { title: '子项目详情', noCache: true, activeMenu: '/project/list' }}
+    ]
+  },
+  {
+    path: '/onsite',
+    component: Layout,
+    children: [{ path: 'workbench', component: () => import('@/views/onsite/workbench/index'), name: 'OnsiteWorkbench', meta: { title: '现场工作台', noCache: true }}, { path: 'records', component: () => import('@/views/onsite/records/index'), name: 'ExecutionRecords', meta: { title: '执行记录', noCache: true }}],
+    meta: { title: '现场作业' }
   },
   {
     path: '/production_management',
     component: Layout,
-    redirect: '/production_management/',
-    meta: { title: '生产管理' },
+    redirect: '/project/list',
+    meta: { title: '现场资源' },
     children: [
       {
         path: 'project',
-        component: () => import('@/views/project/index'),
-        name: 'ProjectManagement',
-        meta: { title: '项目管理' }
+        redirect: '/project/list',
+        hidden: true
       },
       {
         path: 'project/edit/:id(\\d+)',
-        component: () => import('@/views/project/edit/index'),
-        name: 'ProjectEdit',
-        meta: { title: '项目详情' },
+        redirect: to => `/project/${to.params.id}`,
         hidden: true
       },
       {
         path: 'project/process/:assemblyId',
-        component: () => import('@/views/project/process/index'),
-        name: 'AssemblyProcess',
-        meta: { title: '工序配置' },
+        redirect: '/project/list',
         hidden: true
       },
       {
+        path: 'location',
+        component: () => import('@/views/resource/location/index'),
+        name: 'LocationManagement',
+        meta: { title: '位置管理' }
+      },
+      {
         path: 'station',
-        component: () => import('@/views/station/index'),
+        component: () => import('@/views/resource/station/index'),
         name: 'StationManagement',
         meta: { title: '工位管理' }
       },
       {
         path: 'tool',
-        component: () => import('@/views/tool/index'),
+        component: () => import('@/views/resource/tool/index'),
         name: 'ToolManagement',
-        meta: { title: '工具管理' }
+        meta: { title: '工具与设备' }
       }
     ]
+  },
+  {
+    path: '/system',
+    component: Layout,
+    alwaysShow: true,
+    redirect: '/system/appearance',
+    meta: { title: '系统设置' },
+    children: [{ path: 'appearance', component: () => import('@/views/system/appearance/index'), name: 'AppearanceSettings', meta: { title: '页面设置', noCache: true }}]
   }
   // {
   //   path: '/documentation',

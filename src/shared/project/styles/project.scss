@@ -1,0 +1,11 @@
+.project-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 20px; }
+.project-toolbar > .el-input { width: 240px; }
+.project-toolbar > .el-select { width: 140px; }
+.project-toolbar .el-button + .el-button { margin-left: 0; }
+.project-hint { color: #909399; font-size: 12px; line-height: 24px; }
+.project-danger { color: #f56c6c; }
+.project-overview { margin-bottom: 20px; }
+.project-overview .el-col { margin: 10px 0; color: #606266; }
+.project-description { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; color: #606266; }
+.project-section-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.project-error { margin-bottom: 20px; }

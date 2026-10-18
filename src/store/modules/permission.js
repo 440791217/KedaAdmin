@@ -36,21 +36,31 @@ export function filterAsyncRoutes(routes, roles) {
 
 const state = {
   routes: [],
-  addRoutes: []
+  addRoutes: [],
+  ready: false
 }
 
 const mutations = {
   SET_ROUTES: (state, routes) => {
+    state.ready = true
     state.addRoutes = routes
     state.routes = constantRoutes.concat(routes)
+  },
+  RESET_ROUTES: state => {
+    state.routes = constantRoutes
+    state.addRoutes = []
+    state.ready = false
   }
 }
 
 const actions = {
+  resetRoutes({ commit }) {
+    commit('RESET_ROUTES')
+  },
   generateRoutes({ commit }, roles) {
     return new Promise(resolve => {
       let accessedRoutes
-      if (roles.includes('admin')) {
+      if (roles.includes('superuser') || roles.includes('admin')) {
         accessedRoutes = asyncRoutes || []
       } else {
         accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)

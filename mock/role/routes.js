@@ -14,12 +14,12 @@ const constantRoutes = [
   },
   {
     path: '/login',
-    component: 'views/login/index',
+    component: 'views/user/login/index',
     hidden: true
   },
   {
     path: '/auth-redirect',
-    component: 'views/login/auth-redirect',
+    component: 'views/user/auth_redirect/index.vue',
     hidden: true
   },
   {

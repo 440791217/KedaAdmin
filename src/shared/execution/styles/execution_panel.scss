@@ -1,0 +1,6 @@
+.execution-panel { background: #f4f6f9; padding: 0; border-radius: 8px; }
+.execution-heading { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; padding: 18px 22px; background: #fff; border: 1px solid #e3e9f1; border-radius: 8px; h3 { margin: 0; font-size: 19px; } p { color: #63758d; font-size: 13px; line-height: 1.8; margin: 8px 0 0; overflow-wrap: anywhere; } }
+.execution-confirmed { color: #1b9955; }
+.execution-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 16px 0; .el-button { margin-left: 0; } }
+.execution-events { border-top: 1px solid #e3e9f1; padding-top: 16px; font-size: 13px; color: #63758d; line-height: 1.8; overflow-wrap: anywhere; summary { cursor: pointer; } }
+@media(max-width: 900px) { .execution-heading { flex-direction: column; } }

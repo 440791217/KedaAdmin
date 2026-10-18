@@ -1,67 +1,48 @@
 import request from '@/utils/request'
 
-// 登录
-export function login(params) {
-  return request({
-    url: '/user/login',
-    method: 'post',
-    params
-  })
+// 已实现的认证接口
+export function login(data) {
+  return request({ url: '/user/auth/login', method: 'post', data })
 }
-
-// 登出
 export function logout() {
-  return request({
-    url: '/user/logout',
-    method: 'post'
-  })
+  return request({ url: '/user/auth/logout', method: 'post' })
 }
-
 export function getInfo() {
-  return request({
-    url: '/user/info',
-    method: 'get'
-  })
+  return request({ url: '/user/me', method: 'get' })
+}
+export function changePassword(data) {
+  return request({ url: '/user/me/password', method: 'put', data })
 }
 
+// 用户管理接口
 export function fetchUserList(query) {
-  return request({
-    url: '/auth/user/list',
-    method: 'get',
-    params: query
-  })
+  const params = Object.keys(query).reduce((result, key) => {
+    if (query[key] !== '' && query[key] !== null && query[key] !== undefined) result[key] = query[key]
+    return result
+  }, {})
+  return request({ url: '/user/list', method: 'get', params })
 }
-
-// 新增用户
+export function fetchUser(id) {
+  return request({ url: `/user/${id}`, method: 'get' })
+}
+export function fetchTeamOptions() {
+  return request({ url: '/user/team/options', method: 'get' })
+}
+export function fetchRoleOptions() {
+  return request({ url: '/user/role/options', method: 'get' })
+}
+export function resetUserPassword(id, new_password, version) {
+  return request({ url: `/user/${id}/password`, method: 'put', data: { new_password, version }})
+}
 export function createUser(data) {
-  return request({
-    url: '/auth/user',
-    method: 'post',
-    data
-  })
+  return request({ url: '/user', method: 'post', data })
 }
-
-// 编辑用户
 export function updateUser(id, data) {
-  return request({
-    url: `/auth/user/${id}`,
-    method: 'put',
-    data
-  })
+  return request({ url: `/user/${id}`, method: 'put', data })
 }
-
-// 删除用户
-export function deleteUser(id) {
-  return request({
-    url: `/auth/user/${id}`,
-    method: 'delete'
-  })
+export function deleteUser(id, version) {
+  return request({ url: `/user/${id}`, method: 'delete', data: { version }})
 }
-
-export function updateUserStatus(userId, status) {
-  return request({
-    url: `/auth/user/${userId}/status`,
-    method: 'put',
-    params: { status }
-  })
+export function updateUserStatus(userId, status, version) {
+  return request({ url: `/user/${userId}/status`, method: 'put', data: { status, version }})
 }

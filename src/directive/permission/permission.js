@@ -1,6 +1,7 @@
 import store from '@/store'
 
 function checkPermission(el, binding) {
+  if (store.getters.is_superuser) return
   const { value } = binding
   const roles = store.getters && store.getters.roles
 

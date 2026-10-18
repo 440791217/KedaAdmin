@@ -1,0 +1,69 @@
+.sop-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.sop-toolbar .el-input {
+  width: 260px;
+}
+.sop-toolbar .el-button + .el-button {
+  margin-left: 0;
+}
+.sop-card {
+  margin-bottom: 18px;
+}
+.sop-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sop-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+  color: #606266;
+}
+.sop-note {
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.sop-error {
+  margin-bottom: 16px;
+}
+.sop-image {
+  width: 240px;
+  max-width: 100%;
+  height: 180px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px;
+  background: #f5f7fa;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+}
+.sop-image .el-image {
+  width: 100%;
+  height: 100%;
+}
+.sop-fields {
+  max-width: 900px;
+}
+.sop-step-body {
+  margin-top: 16px;
+}
+.sop-danger {
+  color: #f56c6c;
+}
+@media (max-width: 767px) {
+  .sop-toolbar .el-input {
+    width: 100%;
+  }
+  .sop-heading {
+    flex-wrap: wrap;
+  }
+}

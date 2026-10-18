@@ -1,89 +1,67 @@
 import axios from 'axios'
-import { MessageBox, Message } from 'element-ui'
+import { Message } from 'element-ui'
 import store from '@/store'
+import router from '@/router'
 import { getToken } from '@/utils/auth'
 
-// create an axios instance
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
+  baseURL: process.env.VUE_APP_BASE_API,
+  timeout: 10000
+})
+let resettingSession = false
+const isLogin = config => config && config.url === '/user/auth/login'
+
+function failure(message, code, config) {
+  const error = new Error(message || '请求失败')
+  error.code = code
+  error.reported = true
+  Message({ message: error.message, type: 'error', duration: 5000 })
+  // 403表示权限不足，不能把仍有效的登录会话清掉。
+  if (code === 401 && !isLogin(config) && getToken() && !resettingSession) {
+    resettingSession = true
+    const redirect = router.currentRoute.fullPath
+    store.dispatch('user/resetToken').then(() => {
+      if (router.currentRoute.path !== '/login') {
+        return router.replace({ path: '/login', query: { redirect }})
+      }
+    }).catch(() => {
+      // 路由守卫也会处理失效会话，避免重复跳转产生未处理异常。
+    }).finally(() => {
+      resettingSession = false
+    })
+  }
+  return Promise.reject(error)
+}
+
+service.interceptors.request.use(config => {
+  const token = getToken()
+  if (token && !isLogin(config)) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
-// request interceptor
-service.interceptors.request.use(
-  config => {
-    // do something before request is sent
-
-    if (store.getters.token) {
-      // let each request carry token
-      // ['X-Token'] is a custom headers key
-      // please modify it according to the actual situation
-      config.headers['X-Token'] = getToken()
-    }
-    return config
-  },
-  error => {
-    // do something with request error
-    console.log(error) // for debug
-    return Promise.reject(error)
-  }
-)
-
-// response interceptor
-service.interceptors.response.use(
-  /**
-   * If you want to get http information such as headers or status
-   * Please return  response => response
-  */
-
-  /**
-   * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
-   */
-  response => {
-    const res = response.data
-
-    // if the custom code is not 200, it is judged as an error.
-    if (res.code !== 200) {
-      Message({
-        message: res.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
-      // 401: 未授权 / token 无效; 403: 无权限; 408: token 过期;
-      if (res.code === 401 || res.code === 403 || res.code === 408) {
-        // 只有已登录状态下收到 401 才弹登出确认（token 过期场景）
-        // 登录接口本身的 401（账号密码错误）只展示错误消息即可
-        if (store.getters.token) {
-          // to re-login
-          MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-            confirmButtonText: 'Re-Login',
-            cancelButtonText: 'Cancel',
-            type: 'warning'
-          }).then(() => {
-            store.dispatch('user/resetToken').then(() => {
-              location.reload()
-            })
-          })
-        }
-      }
-      return Promise.reject(new Error(res.message || 'Error'))
-    } else {
-      return res
-    }
-  },
-  error => {
-    console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
+service.interceptors.response.use(response => {
+  if (response.config && response.config.responseType === 'blob') return response.data
+  const result = response.data
+  if (result && result.code === 200) return result
+  return failure(result && result.message, result && result.code, response.config)
+}, async error => {
+  const response = error.response
+  const rawBody = response && response.data
+  const body = rawBody instanceof Blob
+    ? await new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onload = () => { try { resolve(JSON.parse(reader.result)) } catch (e) { resolve(null) } }
+      reader.onerror = () => resolve(null)
+      reader.readAsText(rawBody)
     })
-    return Promise.reject(error)
-  }
-)
+    : rawBody
+  return failure(
+    (body && body.message) || (response ? `请求失败（${response.status}）` : '连接后端失败，请确认服务已启动'),
+    (body && body.code) || (response && response.status),
+    error.config
+  )
+})
 
 export default service

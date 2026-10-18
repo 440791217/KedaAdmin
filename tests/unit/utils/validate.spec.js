@@ -3,7 +3,13 @@ describe('Utils:validate', () => {
   it('validUsername', () => {
     expect(validUsername('admin')).toBe(true)
     expect(validUsername('editor')).toBe(true)
-    expect(validUsername('xxxx')).toBe(false)
+    // Accounts come from the database; the template's admin/editor allowlist is obsolete.
+    expect(validUsername('xxxx')).toBe(true)
+    expect(validUsername('root')).toBe(true)
+    expect(validUsername('user_123')).toBe(true)
+    expect(validUsername('')).toBe(false)
+    expect(validUsername('invalid user')).toBe(false)
+    expect(validUsername('a'.repeat(65))).toBe(false)
   })
   it('validURL', () => {
     expect(validURL('https://github.com/PanJiaChen/vue-element-admin')).toBe(true)

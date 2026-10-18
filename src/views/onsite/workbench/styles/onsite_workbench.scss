@@ -1,0 +1,34 @@
+.onsite-workbench { padding: 24px; background: #f4f6f9; min-height: calc(100vh - 140px); color: #303133; }
+.workbench-header, .workbench-controls, .task-toolbar, .task-card-footer, .guide-heading, .guide-step-heading, .guide-navigation { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+h2, h3 { margin: 0; } .workbench-header p, .guide-heading p { margin: 8px 0 0; color: #778396; font-size: 14px; }
+.station-summary { display: flex; flex-wrap: wrap; gap: 24px; background: #fff; padding: 18px; border-radius: 6px; margin: 20px 0; }
+.station-summary span, small, .task-code { color: #778396; font-size: 13px; }
+.task-toolbar { margin: 24px 0 16px; .el-input { width: 320px; } }
+.task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.task-card { background: #fff; border: 1px solid #e6eaf0; border-radius: 8px; padding: 22px; h3 { margin: 12px 0; } }
+.task-project { margin: 0; color: #63758d; font-size: 13px; } .task-card-footer { margin-top: 24px; }
+.task-reason { font-size: 13px; color: #a66a20; line-height: 1.6; } .workbench-empty { text-align: center; color: #909399; padding: 80px 20px; }
+.guide-heading { margin: 24px 0; > div { flex: 1; } }
+.guide-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; align-items: start; }
+.guide-steps { background: #fff; border-radius: 8px; overflow: hidden; button { display: flex; gap: 10px; width: 100%; padding: 18px; border: 0; border-bottom: 1px solid #f0f2f5; background: #fff; text-align: left; cursor: pointer; color: #606266; line-height: 1.6; } button.active { color: #1685e6; background: #edf6ff; font-weight: 600; } }
+.guide-content { background: #fff; padding: 28px; border-radius: 8px; min-width: 0; } .guide-step-heading { margin-bottom: 24px; span { color: #909399; white-space: nowrap; } }
+.guide-text { white-space: pre-wrap; line-height: 1.9; overflow-wrap: anywhere; } .guide-warning { background: #fff7e8; border-left: 3px solid #e6a23c; padding: 16px; margin: 20px 0; p { margin-bottom: 0; } }
+.guide-navigation { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ebeef5; span { color: #909399; font-size: 13px; } }
+@media (max-width: 900px) { .workbench-header { align-items: flex-start; flex-direction: column; } .guide-layout { grid-template-columns: 1fr; } .guide-steps { max-height: 200px; overflow: auto; } .guide-content { padding: 18px; } }
+
+.active-execution, .execution-start { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; background: #edf6ff; padding: 18px; margin: 20px 0; border-radius: 6px; }
+.execution-start .el-input { width: 360px; max-width: 100%; }
+.execution-start small { color: #63758d; }
+.execution-back { margin: 20px 0; }
+
+.workbench-guidance { --guide-height: calc(100vh - 276px); padding: 16px 20px; }
+.workbench-running { --guide-height: calc(100vh - 338px); }
+.workbench-guidance .guide-heading { margin: 0 0 12px; min-height: 50px; gap: 14px; h3 { font-size: 17px; font-weight: 600; color: #32445d; } p { font-size: 12px; margin-top: 5px; } > .el-button { padding: 9px 13px; font-size: 12px; } }
+.guide-station-name { color: #7b8ca2; font-size: 14px; font-weight: 400; }
+.guide-title-divider { margin: 0 12px; color: #c6ced9; }
+.workbench-guidance .execution-start { margin: 0 0 14px; padding: 10px 14px; background: #fff; border: 1px solid #e4eaf2; border-radius: 6px; gap: 10px; .el-input { width: 320px; } small { font-size: 12px; } }
+.scan-help { color: #93a3b8; cursor: help; font-size: 16px; }
+.execution-workspace-toolbar { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.workbench-focused { position: fixed; inset: 0; z-index: 1500; overflow: auto; overscroll-behavior: contain; padding: 16px 20px; --guide-height: calc(100vh - 164px); }
+.workbench-focused.workbench-running { --guide-height: calc(100vh - 238px); }
+@media(max-width: 850px) { .workbench-guidance { padding: 12px; } .workbench-guidance .guide-heading { flex-wrap: wrap; > div { flex-basis: 45%; } } }

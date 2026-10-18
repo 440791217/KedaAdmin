@@ -1,0 +1,3 @@
+@import '../../detail/styles/sop_tasks.scss';
+.task-create { max-width: 900px; margin: 0 auto; }
+.task-work ::v-deep .el-dialog { max-width: calc(100vw - 32px); }
