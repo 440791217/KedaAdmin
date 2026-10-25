@@ -129,7 +129,7 @@
       type="primary"
       plain
       :disabled="busy"
-    >编辑<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
+    >操作<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
       slot="dropdown"
     ><el-dropdown-item command="view">查看详情</el-dropdown-item><el-dropdown-item
       v-if="canManage"
@@ -268,7 +268,7 @@
           v-if="form.connection"
           v-model="form.connection"
           :disabled="busy"
-        /></template>
+        /><frame-rate-fields v-if="form.frame_rates && form.connection && form.connection.protocol === 'rtsp'" v-model="form.frame_rates" inherit :disabled="busy" /></template>
         <el-form-item
           v-if="kind === 'station' || kind === 'device'"
           label="负责人"

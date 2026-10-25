@@ -8,7 +8,7 @@
         type="primary"
         plain
         :disabled="busy"
-      >编辑资料<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
+      >操作<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
         slot="dropdown"
       ><el-dropdown-item v-if="document.can_edit" command="name">修改目录名称</el-dropdown-item><el-dropdown-item v-if="document.can_transfer_owner" command="owner">转移负责人</el-dropdown-item><el-dropdown-item
         v-if="!document.can_edit && !document.can_transfer_owner"
@@ -62,7 +62,7 @@
         plain
         size="mini"
         :disabled="busy"
-      >编辑<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
+      >操作<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
         slot="dropdown"
       ><el-dropdown-item command="preview">只读预览</el-dropdown-item><el-dropdown-item
         v-if="row.status !== 0 || document.can_edit"

@@ -1,3 +1,4 @@
 @import '../../detail/styles/sop_tasks.scss';
 .task-create { max-width: 900px; margin: 0 auto; }
 .task-work ::v-deep .el-dialog { max-width: calc(100vw - 32px); }
+.task-version-bar { margin: 16px 20px 0; padding: 12px 16px; background: #fff; border: 1px solid #e3e9f1; border-radius: 6px; > div { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; } p { font-size: 13px; color: #606266; margin: 8px 0 0; line-height: 1.6; } .el-select { width: 250px; } }

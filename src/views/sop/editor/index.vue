@@ -27,7 +27,7 @@
           size="small"
           :disabled="busy || dirty || stale"
           @click="publish"
-        >{{ taskInfo.task_id ? '仅发布版本' : '发布版本' }}</el-button><el-button v-if="editable && document.can_publish && taskInfo.task_id && taskInfo.task_version != null" type="success" size="small" :disabled="busy || dirty || stale" @click="publishAndUse">{{ taskInfo.task_content ? '发布任务内容' : '发布并用于当前任务' }}</el-button>
+        >{{ taskInfo.task_id ? '仅发布版本' : '发布版本' }}</el-button><el-button v-if="editable && document.can_publish && taskInfo.task_id && taskInfo.task_version != null" type="success" size="small" :disabled="busy || dirty || stale" @click="publishAndUse">{{ taskInfo.task_content ? '发布并启用' : '发布并用于当前任务' }}</el-button>
       </div>
     </div>
     <el-alert v-if="taskInfo.task_id && !embedded" title="在此编写任务步骤、上传图片并标注；可保存草稿，下次继续编辑，或直接发布任务内容。" type="info" :closable="false" />
@@ -82,7 +82,7 @@
           </div>
         </draggable>
         <div v-if="!revision.steps.length" class="authoring-empty">
-          先新增一个步骤，填写操作内容并选择底图。
+          先新增一个步骤，填写操作内容并通过相机拍照。
         </div>
         <div class="authoring-panel-title authoring-mark-heading"><strong>当前图片标注</strong><span class="authoring-count">{{ items.length }}</span></div><div v-if="!items.length" class="authoring-mark-empty"><i class="el-icon-edit-outline" /><span>{{ editable ? '添加图片后，可绘制指引和检测区域' : '当前图片暂无标注' }}</span></div>
         <div
@@ -110,39 +110,12 @@
         <div class="authoring-panel-title">
           <strong>{{ activeStep ? activeStep.title : '制作画布' }}</strong>
           <div>
-            <el-upload
-              v-if="editable && activeStep"
-              action="#"
-              accept="image/png,image/jpeg"
-              :show-file-list="false"
-              :disabled="busy || dirty"
-              :http-request="(request) => upload(activeStep, request)"
-            ><el-button
-              size="small"
-              :disabled="busy || dirty"
-              icon="el-icon-upload2"
-            >上传图片</el-button></el-upload><el-tooltip
-              content="选择工位摄像头，拍照后加入当前步骤进行标注"
-            ><span><el-button size="small" :disabled="!editable || !activeStep || !taskInfo.station_id || busy || stale" icon="el-icon-camera" @click="openCamera">{{ taskInfo.station_id ? '工位摄像头' : '请先关联工位' }}</el-button></span></el-tooltip>
+            <el-button size="small" :disabled="!editable || !activeStep || !taskInfo.station_id || busy || stale" icon="el-icon-camera" @click="openCamera">{{ taskInfo.station_id ? '相机拍照' : '请先关联工位' }}</el-button>
+            <el-button v-if="editable && activeImage" type="text" size="mini" :disabled="busy || dirty" @click="removeImage(activeStep, activeImage)">移除图片</el-button>
           </div>
         </div>
-        <div v-if="activeStep && activeStep.attachments.length" class="authoring-images">
-          <el-button
-            v-for="(image, index) in activeStep.attachments"
-            :key="image.id"
-            size="mini"
-            :type="currentImageId === image.id ? 'primary' : ''"
-            :disabled="busy"
-            @click="selectImage(image.id)"
-          >{{ index + 1 }} · {{ image.original_name }}</el-button><el-button
-            v-if="editable && activeImage"
-            type="text"
-            size="mini"
-            :disabled="busy || dirty"
-            @click="removeImage(activeStep, activeImage)"
-          >移除当前图</el-button>
-        </div>
         <div v-if="activeImage" class="authoring-tools">
+          <el-tag v-if="work.detection.attachment_id === currentImageId" size="mini" type="success">检测基准</el-tag>
           <el-radio-group
             v-model="markMode"
             size="mini"
@@ -188,7 +161,7 @@
               imageFailed
                 ? '图片加载失败'
                 : activeStep
-                  ? (editable ? '上传PNG/JPEG图片后，在真实图片上制作标注。' : '此步骤暂无图片。')
+                  ? (editable ? '点击相机拍照，确认照片后在画面上制作标注。' : '此步骤暂无图片。')
                   : (editable ? '从左侧新增或选择步骤。' : '暂无步骤，可点击编辑开始编写。')
             }}</p><el-button v-if="imageFailed" type="text" @click="loadImage">重试</el-button>
           </div>
@@ -209,36 +182,24 @@
          ><el-form v-if="work" label-position="top" size="small" :disabled="busy || !editable">
             <el-form-item
               label="步骤名称"
-            ><el-input v-model="work.step.title" maxlength="128" /></el-form-item><el-form-item
-              label="操作说明 / 文字引导"
+            ><el-input v-model="work.step.title" maxlength="128" /></el-form-item>
+            <step-detection-settings v-model="work.detection" :station-id="String(taskInfo.station_id || '')" @camera="openCamera" />
+            <el-form-item
+              label="操作说明"
             ><el-input
               v-model="work.step.instruction"
               type="textarea"
               :rows="4"
+              placeholder="填写操作方法、检查标准及必要的注意事项"
               maxlength="10000"
             /></el-form-item><el-form-item
-              label="注意事项"
-            ><el-input v-model="work.step.precautions" type="textarea" maxlength="5000" /></el-form-item><el-form-item
-              label="检查要求"
-            ><el-input
-              v-model="work.step.check_requirements"
-              type="textarea"
-              maxlength="5000"
-            /></el-form-item><el-form-item
-              label="参考作业时长（秒，可空）"
+              label="作业时长（秒，最小为0）"
             ><el-input-number
               :value="work.step.expected_duration_seconds == null ? undefined : work.step.expected_duration_seconds"
               :min="0"
               :max="99999999.99"
               :precision="2"
               @input="work.step.expected_duration_seconds = $event == null ? null : $event"
-            /></el-form-item><el-form-item
-              label="进入步骤后的检测等待（秒）"
-            ><el-input-number
-              v-model="work.step.detection_wait_seconds"
-              :min="0"
-              :max="3600"
-              :precision="1"
             /></el-form-item><el-form-item label="语音提示"><el-switch v-model="work.step.voice_enabled" /></el-form-item><el-form-item
               v-if="work.step.voice_enabled"
               label="语音内容"
@@ -246,7 +207,7 @@
               type="text"
               :disabled="!work.step.voice_text.trim()"
               @click="previewVoice"
-            >试听</el-button></el-form-item><resource-requirements v-model="work.resources" :station-id="taskInfo.station_id || ''" :disabled="busy || !editable" /></el-form>
+            >试听</el-button></el-form-item></el-form>
            <div v-else class="authoring-empty">请选择步骤</div></el-tab-pane>
           <el-tab-pane
             label="标注属性"
@@ -264,9 +225,10 @@
               @input="property('name', $event)"
             /></el-form-item><el-form-item
               label="颜色"
-            ><el-color-picker
+            ><annotation-colors
               :value="selected.color"
-              @change="property('color', $event || '#409EFF')"
+              :disabled="busy || !editable"
+              @input="property('color', $event)"
             /></el-form-item><el-form-item
               v-if="selected.kind === 'text'"
               label="显示文字"
@@ -278,57 +240,62 @@
             /></el-form-item><template
               v-if="selected.detect_type"
             ><el-form-item
-              label="启用区域"
-            ><el-switch :value="selected.enabled" @change="property('enabled', $event)" /></el-form-item><el-form-item
-              label="检测类型"
-            ><el-select
-              :value="selected.detect_type"
-              @change="property('detect_type', $event)"
-            ><el-option label="目标存在" value="object" /><el-option
-              label="数量"
-              value="count"
-            /><el-option label="状态" value="status" /><el-option
-              label="OCR文字"
-              value="ocr"
-            /></el-select></el-form-item><el-form-item
-              v-if="selected.detect_type !== 'ocr'"
-              label="目标类别"
-            ><el-input
-              :value="selected.class_name"
-              maxlength="128"
-              placeholder="填写目标类别，不限制行业"
-              @input="property('class_name', $event)"
-            /></el-form-item><el-form-item
-              label="置信度阈值（%）"
-            ><el-input-number
-              :value="selected.confidence"
-              :min="0"
-              :max="100"
-              @change="property('confidence', $event)"
-            /></el-form-item><el-form-item
-              v-if="selected.detect_type === 'count'"
-              label="期望数量"
-            ><el-input-number
-              :value="selected.expected_count"
-              :min="1"
-              :max="100000"
-              :precision="0"
-              @change="property('expected_count', $event)"
-            /></el-form-item><el-form-item
-              v-if="selected.detect_type === 'ocr'"
-              label="期望文字"
-            ><el-input
-              :value="selected.expected_text"
-              maxlength="1000"
-              @input="property('expected_text', $event)"
-            /></el-form-item><el-form-item
-              v-if="selected.detect_type === 'status'"
-              label="期望状态"
-            ><el-input
-              :value="selected.expected_state"
-              maxlength="128"
-              @input="property('expected_state', $event)"
-            /></el-form-item></template>
+               label="参与检测"
+             ><el-switch :value="selected.enabled" @change="property('enabled', $event)" /></el-form-item><el-form-item
+               label="检测类型"
+             ><el-select
+               :value="selected.detect_type"
+               @change="property('detect_type', $event)"
+             ><el-option label="目标存在" value="object" /><el-option
+               label="数量"
+               value="count"
+             /><el-option label="状态" value="status" /><el-option
+               label="OCR文字"
+               value="ocr"
+             /></el-select></el-form-item><el-form-item
+               v-if="selected.detect_type !== 'ocr'"
+               label="目标类别"
+             ><target-class-select
+               :value="selected.class_name"
+               :reference-src="imageUrl"
+               :region="selected"
+               @input="property('class_name', $event)"
+             /></el-form-item><el-form-item
+               label="最低置信度（%）"
+             ><el-input-number
+               :value="selected.confidence"
+               :min="0"
+               :max="100"
+               @change="property('confidence', $event)"
+             /></el-form-item><el-form-item
+               v-if="selected.detect_type === 'count'"
+               label="期望数量"
+             ><el-input-number
+               :value="selected.expected_count"
+               :min="1"
+               :max="100000"
+               :precision="0"
+               @change="property('expected_count', $event)"
+             /></el-form-item><el-form-item
+               v-if="selected.detect_type === 'ocr'"
+               label="期望文字"
+             ><el-input
+               :value="selected.expected_text"
+               maxlength="1000"
+               @input="property('expected_text', $event)"
+             /></el-form-item><el-form-item
+               v-if="selected.detect_type === 'status'"
+               label="期望状态"
+             ><el-input
+               :value="selected.expected_state"
+               maxlength="128"
+               @input="property('expected_state', $event)"
+             /></el-form-item>
+              <div class="detection-requirement" :class="{ inactive: selected.enabled === false }" role="status">
+                <span>{{ selected.enabled === false ? '检测已暂停' : '检测要求' }}</span>
+                <p>{{ detectionRequirement }}</p>
+              </div>
+            </template>
              <p class="authoring-hint">
                {{
                  selected.detect_type ? '区域只保存检测配置，未连接模型。' : '操作指引随内容保存。'
@@ -370,7 +337,7 @@
     /></el-form-item></el-form><span
       slot="footer"
     ><el-button @click="detailsDialog = false">关闭</el-button><el-button v-if="editable" type="primary" :loading="busy" @click="saveAll">保存草稿</el-button></span></el-dialog>
-    <camera-source v-if="taskInfo.station_id" :visible.sync="cameraDialog" :station-id="taskInfo.station_id" @capture="useCameraImage" />
+    <camera-source v-if="taskInfo.station_id" :visible.sync="cameraDialog" :station-id="taskInfo.station_id" :preferred-camera-id="work ? work.detection.camera_id || '' : ''" :replacing="!!activeImage" @capture="useCameraImage" />
     <step-form :visible.sync="stepDialog" :step="selectedStep" :busy="busy" @save="saveStep" />
   </div>
 </template>

@@ -1,7 +1,11 @@
 import Draggable from 'vuedraggable'
+import { stepImage } from '@/utils/step-image'
+import { classNameZh } from '@/utils/detection-classes'
 import { publishTaskStandard, fetchTaskImage } from '@/api/resource'
 import CameraSource from '@/views/sop/editor/components/CameraSource.vue'
-import ResourceRequirements from '@/views/sop/editor/components/ResourceRequirements.vue'
+import TargetClassSelect from '@/views/sop/editor/components/TargetClassSelect.vue'
+import AnnotationColors from '@/views/sop/editor/components/AnnotationColors.vue'
+import StepDetectionSettings from '@/views/sop/editor/components/StepDetectionSettings.vue'
 import editor from '@/views/sop/editor/js/sop_editor'
 import VisualCanvas from '@/shared/sop/components/VisualCanvas.vue'
 import { fetchSopImage, saveSopAuthoring, saveSopVersion, sortSopSteps } from '@/api/sop'
@@ -14,8 +18,8 @@ const stepFields = (step) => ({
   instruction: step.instruction || '',
   precautions: step.precautions || '',
   check_requirements: step.check_requirements || '',
-  expected_duration_seconds: step.expected_duration_seconds == null ? null : step.expected_duration_seconds,
-  detection_wait_seconds: Number(step.detection_wait_seconds || 0),
+  expected_duration_seconds: step.expected_duration_seconds == null ? 0 : step.expected_duration_seconds,
+  detection_wait_seconds: 0,
   voice_enabled: !!Number(step.voice_enabled || 0),
   voice_text: step.voice_text || ''
 })
@@ -30,7 +34,7 @@ export default {
     taskContext: { type: Object, default: null },
     previewRevision: { type: Object, default: null }
   },
-  components: { Draggable, VisualCanvas, ResourceRequirements, CameraSource },
+  components: { Draggable, VisualCanvas, CameraSource, TargetClassSelect, AnnotationColors, StepDetectionSettings },
   data() {
     return {
       cameraDialog: false,
@@ -62,6 +66,16 @@ export default {
     }
   },
   computed: {
+    detectionRequirement() {
+      const region = this.selected
+      if (!region || !region.detect_type) return ''
+      const target = classNameZh(region.class_name) || '待选择目标'
+      let requirement = `框内出现${target}`
+      if (region.detect_type === 'count') requirement = `框内${target}数量为 ${region.expected_count || 1} 个`
+      if (region.detect_type === 'ocr') requirement = `框内文字为“${region.expected_text || '待填写'}”`
+      if (region.detect_type === 'status') requirement = `框内${target}状态为“${region.expected_state || '待填写'}”`
+      return `${requirement}，置信度 ≥ ${region.confidence == null ? 0 : region.confidence}%。`
+    },
     taskInfo() { return this.taskContext || this.$route.query },
     sopId() { return this.contentSopId || this.$route.params.sopId },
     revisionId() { return this.contentRevisionId || this.$route.params.revisionId },
@@ -70,10 +84,10 @@ export default {
       return this.revision && this.revision.steps.find((s) => s.id === this.currentStepId)
     },
     activeImage() {
-      return this.activeStep && this.activeStep.attachments.find((a) => a.id === this.currentImageId)
+      return stepImage(this.activeStep)
     },
     visual() {
-      return this.work && this.work.visuals[this.currentImageId]
+      return this.work && this.work.visual
     },
     items() {
       return this.visual ? [...this.visual.guide_items, ...this.visual.detection_regions] : []
@@ -107,6 +121,9 @@ export default {
     })
   },
   methods: {
+    async removeImage(step, image) {
+      return editor.methods.removeImage.call(this, step, image)
+    },
     async openCamera() {
       if (this.busy || this.stale || !this.editable || !this.activeStep || !this.taskInfo.station_id) return
       if (await this.resolvePending()) this.cameraDialog = true
@@ -117,7 +134,7 @@ export default {
         request.onError(new Error('当前步骤不可上传'))
         return
       }
-      await this.upload(this.activeStep, request)
+      await this.upload(this.activeStep, { ...request, replaceAttachmentId: this.currentImageId || undefined })
     },
     async load() {
       if (this.embedded && this.viewOnly) {
@@ -169,21 +186,10 @@ export default {
         this.releaseImage()
         return
       }
-      const visuals = {}
-      step.attachments.forEach((a) => {
-        visuals[a.id] = {
-          attachment_id: a.id,
-          schema_version: 1,
-          image_width: 0,
-          image_height: 0,
-          guide_items: [],
-          detection_regions: [],
-          ...clone(a.visual || {})
-        }
-      })
-      this.work = { step: stepFields(step), visuals, resources: { workplace_requirements: step.workplace_requirements || '', items: clone(step.resource_requirements || []) }}
+      const image = stepImage(step)
+      const visual = image ? { attachment_id: image.id, schema_version: 1, image_width: 0, image_height: 0, guide_items: [], detection_regions: [], ...clone(image.visual || {}) } : null
+      this.work = { step: stepFields(step), detection: { enabled: false, camera_id: '', attachment_id: '', confirmed: false, ...clone(step.detection || {}) }, visual, resources: { workplace_requirements: step.workplace_requirements || '', items: clone(step.resource_requirements || []) }}
       this.workBaseline = JSON.stringify(this.work)
-      const image = step.attachments.find((a) => a.id === this.currentImageId) || step.attachments[0]
       this.currentImageId = image ? image.id : ''
       this.loadImage()
     },
@@ -209,14 +215,6 @@ export default {
     async selectStep(id) {
       if (id === this.currentStepId || this.busy) return
       if (await this.resolvePending()) this.setupStep(id)
-    },
-    async selectImage(id) {
-      if (id === this.currentImageId || this.busy) return
-      if (await this.resolvePending()) {
-        this.currentImageId = id
-        this.selectedId = ''
-        this.loadImage()
-      }
     },
     releaseImage() {
       if (this.imageUrl) URL.revokeObjectURL(this.imageUrl)
@@ -247,8 +245,8 @@ export default {
         this.visual.image_width = size.width
         this.visual.image_height = size.height
         const baseline = JSON.parse(this.workBaseline)
-        baseline.visuals[this.currentImageId].image_width = size.width
-        baseline.visuals[this.currentImageId].image_height = size.height
+        baseline.visual.image_width = size.width
+        baseline.visual.image_height = size.height
         this.workBaseline = JSON.stringify(baseline)
       }
     },
@@ -284,7 +282,7 @@ export default {
           kind: 'rect',
           enabled: true,
           detect_type: 'object',
-          class_name: '目标',
+          class_name: '',
           confidence: 75,
           expected_count: 1,
           expected_text: '',
@@ -338,10 +336,12 @@ export default {
           ? await saveSopAuthoring(this.sopId, this.revisionId, this.activeStep.id, {
             step: {
               ...this.work.step,
+              detection_wait_seconds: 0,
               version: this.activeStep.version,
               revision_version: this.revision.version
             },
-            visuals: Object.values(this.work.visuals).filter((v) => v.image_width > 0),
+            visual: this.visual && this.visual.image_width > 0 ? this.visual : null,
+            detection: { enabled: !!this.work.detection.enabled, camera_id: this.work.detection.camera_id || null, attachment_id: this.work.detection.attachment_id || null, confirmed: !!this.work.detection.confirmed },
             revision: { ...this.header, version: this.revision.version },
             resources: this.work.resources
           })
@@ -363,13 +363,7 @@ export default {
       if (adding && !this.stepDialog && this.revision.steps.length) { this.setupStep(this.revision.steps[this.revision.steps.length - 1].id) }
     },
     async upload(step, request) {
-      const previous = new Set(step.attachments.map(a => a.id))
       await editor.methods.upload.call(this, step, request)
-      const added = this.activeStep && this.activeStep.attachments.find(a => !previous.has(a.id))
-      if (added) {
-        this.currentImageId = added.id
-        this.loadImage()
-      }
     },
     async newStep() {
       if (!this.busy && (await this.resolvePending())) this.openStep(null)

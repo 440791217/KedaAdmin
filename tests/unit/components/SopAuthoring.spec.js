@@ -15,13 +15,13 @@ const originalCrypto = Object.getOwnPropertyDescriptor(window, 'crypto')
 let wrappers; let value
 it('uploads a camera photo through the existing step image API and selects the new attachment', async() => {
   const w = page(Authoring); await flush()
-  const r = revision(); r.version = 3; r.steps[0].attachments.push({ id: '12', file_id: '13', original_name: 'camera.jpg', visual: null })
+  const r = revision(); r.version = 3; r.steps[0].image = { id: '12', file_id: '13', original_name: 'camera.jpg', visual: null }; r.steps[0].attachments = [r.steps[0].image]
   request.mockImplementation(c => c.responseType === 'blob' ? Promise.resolve(new Blob(['jpeg'])) : Promise.resolve({ data: r }))
-  const job = { file: new File(['jpeg'], 'camera.jpg', { type: 'image/jpeg' }), onSuccess: jest.fn(), onError: jest.fn() }
+  const job = { cameraId: '2', file: new File(['jpeg'], 'camera.jpg', { type: 'image/jpeg' }), onSuccess: jest.fn(), onError: jest.fn() }
   await w.vm.useCameraImage(job); await flush()
   const upload = request.mock.calls.find(([c]) => c.url === '/sop/7/version/8/step/9/image')[0]
-  expect(upload.data.get('file')).toBe(job.file); expect(upload.data.get('version')).toBe('2')
-  expect(w.vm.currentImageId).toBe('12'); expect(w.vm.activeStep.attachments).toHaveLength(2)
+  expect(upload.data.get('file')).toBe(job.file); expect(upload.data.get('version')).toBe('2'); expect(upload.data.get('camera_id')).toBe('2'); expect(upload.data.get('replace_attachment_id')).toBe('10')
+  expect(w.vm.currentImageId).toBe('12'); expect(w.vm.activeImage.id).toBe('12')
   expect(job.onSuccess).toHaveBeenCalled(); expect(job.onError).not.toHaveBeenCalled()
 })
 it('preserves the current image on failed camera upload and blocks unsaved annotations', async() => {
@@ -35,6 +35,18 @@ it('preserves the current image on failed camera upload and blocks unsaved annot
 function page(component, propsData = {}, extra = {}) { const w = mount(component, { localVue, sync: false, propsData, mocks: { $route: { params: { sopId: '7', revisionId: '8' }, query: {}, fullPath: '/sop/7/version/8/edit' }, $router: { push: jest.fn().mockResolvedValue() }, $confirm: jest.fn().mockResolvedValue(), $message: { success: jest.fn(), error: jest.fn() }}, stubs: { transition: true, 'transition-group': true, 'el-select': { template: '<div><slot /></div>' }, 'el-option': true }, ...extra }); wrappers.push(w); return w }
 beforeEach(() => { wrappers = []; value = 0; request.mockReset(); URL.createObjectURL = jest.fn().mockReturnValue('blob:reference'); URL.revokeObjectURL = jest.fn(); Object.defineProperty(window, 'crypto', { configurable: true, value: { getRandomValues: a => a.fill(++value) }}); request.mockImplementation(c => { if (c.responseType === 'blob') return Promise.resolve(new Blob(['png'])); if (c.url === '/sop/7') return Promise.resolve({ data: document() }); return Promise.resolve({ data: revision() }) }) })
 afterEach(() => { wrappers.forEach(w => w.destroy()); if (originalCrypto)Object.defineProperty(window, 'crypto', originalCrypto); else delete window.crypto })
+
+it('hides the image picker and upload entry while retaining annotation change protection', async() => {
+  const w = page(Authoring); await flush()
+  expect(w.find('.authoring-images').exists()).toBe(false)
+  w.vm.revision.steps[0].attachments.push({ id: '12', file_id: '13', original_name: 'camera-long-generated-name.jpg', visual: null })
+  w.vm.setupStep('9'); await flush()
+  expect(w.find('.authoring-image-select').exists()).toBe(false)
+  expect(w.text()).not.toContain('上一张'); expect(w.text()).not.toContain('下一张'); expect(w.text()).not.toContain('上传图片')
+  expect(w.text()).not.toContain('camera-long-generated-name.jpg')
+  expect(w.vm.currentImageId).toBe('10')
+  expect(w.vm.activeImage.id).toBe('10')
+})
 describe('unified SOP authoring', () => {
   it('renders published task content in the same three-column workspace without source requests or mutations', async() => {
     const r = revision(); r.status = 1
@@ -51,12 +63,12 @@ describe('unified SOP authoring', () => {
   it('requires a station before opening the camera and does not start unsolicited streams', async() => { const w = page(Authoring); await flush(); expect(w.find('.authoring-columns').exists()).toBe(true); expect(w.text()).toContain('请先关联工位'); expect(w.text()).toContain('管理项目'); expect(w.vm.dirty).toBe(false); expect(request.mock.calls.some(([c]) => /camera|rtsp/.test(c.url))).toBe(false) })
   it('saves header, step configuration and normalized marks in one request', async() => {
     const w = page(Authoring); await flush(); w.vm.dimensions({ width: 640, height: 480 }); expect(w.vm.dirty).toBe(false)
-    w.vm.work.step.detection_wait_seconds = 3; w.vm.work.step.voice_enabled = true; w.vm.work.step.voice_text = '检查底图'
+    expect(w.vm.work.step.expected_duration_seconds).toBe(0); expect(w.text()).not.toContain('检测等待'); w.vm.work.step.detection_wait_seconds = 3; w.vm.work.step.voice_enabled = true; w.vm.work.step.voice_text = '检查底图'
     w.vm.createMark({ kind: 'rect', x: 0.1, y: 0.2, width: 0.3, height: 0.4 }); await flush(); expect(w.vm.dirty).toBe(true)
     const saved = revision(); saved.version = 3; saved.steps[0] = { ...saved.steps[0], ...w.vm.work.step, version: 1, attachments: [{ ...image(), visual: JSON.parse(JSON.stringify(w.vm.visual)) }] }
     request.mockImplementationOnce(() => Promise.resolve({ data: saved })); await w.vm.saveAll(); await flush()
     const sent = request.mock.calls.map(([c]) => c).find(c => c.url.endsWith('/authoring'))
-    expect(sent.method).toBe('put'); expect(sent.data.step).toEqual(expect.objectContaining({ version: 0, revision_version: 2, detection_wait_seconds: 3, voice_text: '检查底图' })); expect(sent.data.visuals[0].guide_items[0]).toEqual(expect.objectContaining({ x: 0.1, y: 0.2, width: 0.3, height: 0.4 })); expect(sent.data.revision.version).toBe(2); expect(w.vm.dirty).toBe(false)
+    expect(sent.method).toBe('put'); expect(sent.data.step).toEqual(expect.objectContaining({ version: 0, revision_version: 2, expected_duration_seconds: 0, detection_wait_seconds: 0, voice_text: '检查底图' })); expect(sent.data.visual.guide_items[0]).toEqual(expect.objectContaining({ x: 0.1, y: 0.2, width: 0.3, height: 0.4 })); expect(sent.data.revision.version).toBe(2); expect(w.vm.dirty).toBe(false)
   })
   it('keeps local marks after a conflicting save and never silently reloads them away', async() => { const w = page(Authoring); await flush(); w.vm.dimensions({ width: 640, height: 480 }); w.vm.createMark({ kind: 'rect', x: 0.1, y: 0.1, width: 0.2, height: 0.2 }); const snapshot = JSON.stringify(w.vm.work); request.mockClear(); request.mockRejectedValueOnce({ code: 409 }); await w.vm.saveAll(); await flush(); expect(w.vm.stale).toBe(true); expect(JSON.stringify(w.vm.work)).toBe(snapshot); expect(request).toHaveBeenCalledTimes(1); expect(w.text()).toContain('本地修改仍保留') })
   it('supports detection configuration and undo without mutating the loaded version', async() => { const w = page(Authoring); await flush(); w.vm.dimensions({ width: 640, height: 480 }); w.vm.markMode = 'detect'; w.vm.createMark({ kind: 'rect', x: 0.1, y: 0.1, width: 0.2, height: 0.2 }); expect(w.vm.visual.detection_regions[0].detect_type).toBe('object'); expect(w.vm.revision.steps[0].attachments[0].visual).toBeNull(); w.vm.undo(); expect(w.vm.items).toHaveLength(0); expect(w.vm.dirty).toBe(false) })
@@ -79,3 +91,59 @@ it('retains the loaded order on a failed drag save and blocks unsaved or conflic
   expect(w.vm.revision.steps.map(s => s.id)).toEqual(['9', '12']); expect(w.vm.stale).toBe(true)
 })
 
+it('restores the single saved image on reload without consulting legacy ordering', async() => {
+  const r = revision()
+  r.steps[0].attachments.push({ id: '12', file_id: '13', visual: null })
+  r.steps[0].detection = { enabled: true, camera_id: '2', attachment_id: '12', confirmed: true }
+  const w = page(Authoring); await flush(); w.vm.accept(r); await flush()
+  expect(w.vm.currentImageId).toBe('12')
+  expect(w.vm.work.detection.attachment_id).toBe('12')
+  expect(w.vm.dirty).toBe(false)
+  w.vm.accept(r); await flush()
+  expect(w.vm.currentImageId).toBe('12')
+  expect(w.vm.activeImage.id).toBe('12')
+})
+
+it('keeps the canvas empty after removal instead of selecting another legacy image', async() => {
+  const r = revision()
+  r.steps[0].detection = { enabled: false, camera_id: '2', attachment_id: null, confirmed: false }
+  const w = page(Authoring); await flush(); w.vm.accept(r); await flush()
+  expect(w.vm.currentImageId).toBe('')
+  expect(w.vm.activeImage).toBeNull()
+})
+
+it('removes the step image with one request and immediately clears the canvas', async() => {
+  const w = page(Authoring); await flush()
+  const empty = revision()
+  empty.version = 3
+  empty.steps[0].image = null
+  empty.steps[0].attachments = []
+  empty.steps[0].detection = { enabled: false, attachment_id: null, confirmed: false }
+  request.mockClear()
+  request.mockResolvedValue({ data: empty })
+  await w.vm.removeImage(w.vm.activeStep, w.vm.activeImage); await flush()
+  expect(request).toHaveBeenCalledTimes(1)
+  expect(request.mock.calls[0][0]).toEqual(expect.objectContaining({ method: 'delete', url: '/sop/7/version/8/step/9/image/10' }))
+  expect(w.vm.activeImage).toBeNull()
+  expect(w.vm.imageUrl).toBe('')
+  expect(w.vm.items).toHaveLength(0)
+})
+
+it('keeps optional requirements hidden and preserves their saved values when editing instructions', async() => {
+  const w = page(Authoring); await flush()
+  const r = revision()
+  Object.assign(r.steps[0], { precautions: '原注意事项', check_requirements: '原检查要求', workplace_requirements: '原环境要求', resource_requirements: [{ model_id: '2', quantity: 1 }] })
+  w.vm.accept(r); await flush()
+  const labels = w.find('.authoring-properties').findAll('.el-form-item__label').wrappers.map(item => item.text())
+  expect(labels).toContain('操作说明')
+  expect(labels).not.toContain('注意事项')
+  expect(labels).not.toContain('检查要求')
+  expect(w.find('resource-requirements').exists()).toBe(false)
+  w.vm.work.step.instruction = '统一填写在操作说明'
+  request.mockClear(); request.mockResolvedValue({ data: r })
+  await w.vm.saveAll()
+  const sent = request.mock.calls[0][0].data
+  expect(sent.step.precautions).toBe('原注意事项')
+  expect(sent.step.check_requirements).toBe('原检查要求')
+  expect(sent.resources).toEqual({ workplace_requirements: '原环境要求', items: [{ model_id: '2', quantity: 1 }] })
+})

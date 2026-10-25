@@ -21,11 +21,7 @@
     label="操作说明"
     prop="instruction"
     :rules="[{ required: true, whitespace: true, message: '请输入操作说明' }]"
-  ><el-input v-model="form.instruction" type="textarea" :rows="5" maxlength="10000" /></el-form-item><el-form-item
-    label="注意事项"
-  ><el-input v-model="form.precautions" type="textarea" maxlength="5000" /></el-form-item><el-form-item
-    label="检查要求"
-  ><el-input v-model="form.check_requirements" type="textarea" maxlength="5000" /></el-form-item><el-form-item
+  ><el-input v-model="form.instruction" type="textarea" :rows="5" maxlength="10000" placeholder="填写操作方法、检查标准及必要的注意事项" /></el-form-item><el-form-item
     label="参考时长"
   ><el-input-number
     v-model="form.expected_duration_seconds"

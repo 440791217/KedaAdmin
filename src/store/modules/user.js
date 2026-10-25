@@ -67,6 +67,7 @@ const actions = {
     }
   },
   async resetToken({ commit, dispatch }) {
+    await dispatch('settings/resetSystemDefaults', null, { root: true })
     removeToken()
     commit('CLEAR_SESSION')
     resetRouter()

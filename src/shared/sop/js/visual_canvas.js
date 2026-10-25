@@ -1,6 +1,9 @@
+import RegionLabel from '../components/RegionLabel.vue'
+import { layoutRegionLabels } from '@/utils/region-label-layout'
 const clamp = (x, min = 0, max = 1) => Math.max(min, Math.min(max, x))
 export default {
   name: 'VisualCanvas',
+  components: { RegionLabel },
   props: {
     src: { type: String, default: '' },
     width: { type: Number, default: 1000 },
@@ -11,11 +14,12 @@ export default {
     readonly: Boolean
   },
   data() {
-    return { gesture: null, drawing: null, corners: ['nw', 'ne', 'sw', 'se'] }
+    return { stageWidth: 0, gesture: null, drawing: null, corners: ['nw', 'ne', 'sw', 'se'] }
   },
   computed: {
+    regionPlacements() { return layoutRegionLabels(this.items.filter(item => item.detect_type), this.width, this.height, this.fontSize) },
     fontSize() {
-      return Math.max(this.width / 50, 12)
+      return this.width * 12 / (this.stageWidth || Math.min(this.width, 800))
     },
     lineWidth() {
       return Math.max(this.width / 400, 1)
@@ -25,16 +29,22 @@ export default {
     }
   },
   mounted() {
+    this.measure()
+    if (typeof ResizeObserver !== 'undefined') { this.stageObserver = new ResizeObserver(this.measure); this.stageObserver.observe(this.$el) }
+    window.addEventListener('resize', this.measure)
     window.addEventListener('pointermove', this.move)
     window.addEventListener('pointerup', this.end)
     window.addEventListener('pointercancel', this.cancel)
   },
   beforeDestroy() {
+    if (this.stageObserver) this.stageObserver.disconnect()
+    window.removeEventListener('resize', this.measure)
     window.removeEventListener('pointermove', this.move)
     window.removeEventListener('pointerup', this.end)
     window.removeEventListener('pointercancel', this.cancel)
   },
   methods: {
+    measure() { this.stageWidth = this.$el.getBoundingClientRect().width },
     point(e) {
       const r = this.$refs.svg.getBoundingClientRect()
       return { x: clamp((e.clientX - r.left) / r.width), y: clamp((e.clientY - r.top) / r.height) }

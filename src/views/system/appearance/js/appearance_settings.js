@@ -4,7 +4,10 @@ export default {
   name: 'AppearanceSettings',
   components: { ThemePicker },
   data() {
-    return {}
+    return { saving: false, failed: false }
+  },
+  created() {
+    this.reload()
   },
   computed: {
     fixedHeader: {
@@ -42,6 +45,26 @@ export default {
     }
   },
   methods: {
+    async reload() {
+      this.failed = false
+      try {
+        await this.$store.dispatch('settings/loadSystemDefaults')
+      } catch (error) {
+        this.failed = true
+      }
+    },
+    async save() {
+      if (this.saving) return
+      this.saving = true
+      try {
+        await this.$store.dispatch('settings/saveSystemDefaults')
+        this.$message.success('系统页面参数已保存')
+      } catch (error) {
+        // Request interceptor reports validation and version errors.
+      } finally {
+        this.saving = false
+      }
+    },
     themeChange(val) {
       this.$store.dispatch('settings/changeSetting', {
         key: 'theme',

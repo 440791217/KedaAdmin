@@ -37,6 +37,9 @@ export function deleteProject(id, version) {
 }
 
 export const fetchProject = id => request({ url: `/project/${id}` })
+export const fetchProjectStations = (id, params) => request({ url: `/project/${id}/station/list`, params })
+export const addProjectStation = (id, station_id, version) => request({ url: `/project/${id}/station`, method: 'post', data: { station_id, version }})
+export const removeProjectStation = (id, stationId, version) => request({ url: `/project/${id}/station/${stationId}`, method: 'delete', data: { version }})
 export const fetchProjectMembers = (pid, params) => request({ url: `/project/${pid}/member/list`, params })
 export const fetchMemberOptions = (pid, keyword, purpose = 'member') => request({ url: `/project/${pid}/member/options`, params: { keyword, purpose }})
 export const addProjectMember = (pid, data) => request({ url: `/project/${pid}/member`, method: 'post', data })

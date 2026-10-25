@@ -32,10 +32,12 @@ export const deleteSopStep = (id, rid, sid, version, revisionVersion) =>
   })
 export const sortSopSteps = (id, rid, ids, version) =>
   request({ url: versionPath(id, rid) + '/step/sort', method: 'put', data: { ids, version }})
-export function uploadSopImage(id, rid, sid, file, version) {
+export function uploadSopImage(id, rid, sid, file, version, cameraId, replaceAttachmentId) {
   const data = new FormData()
   data.append('file', file)
   data.append('version', version)
+  if (cameraId) data.append('camera_id', cameraId)
+  if (replaceAttachmentId) data.append('replace_attachment_id', replaceAttachmentId)
   return request({ url: versionPath(id, rid) + `/step/${sid}/image`, method: 'post', data, timeout: 60000 })
 }
 export const removeSopImage = (id, rid, sid, aid, version) =>

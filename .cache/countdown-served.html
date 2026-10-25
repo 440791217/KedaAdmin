@@ -1,0 +1,115 @@
+<!doctype html><meta charset="utf-8"><title>Continuous countdown verification</title><style>body{font:16px sans-serif;padding:20px;background:#f2f6fb}#status{white-space:pre-wrap}.operation-visual,.operation-controls,el-dialog{display:none}.operation-sidebar{display:flex;gap:60px;background:white;padding:24px}.timing-running{color:#1875ca;font-size:18px}</style><h1>Continuous countdown verification</h1><pre id="status">Running actual Vue countdown...</pre><div id="app"></div><script src="/vue.js"></script><script>
+const stepImage=()=>null,regionRequirements=()=>[];const AnnotatedImage={render:h=>h('div')},DetectionStatus={render:h=>h('div')},ExecutionEvidence={render:h=>h('div')};
+const guide = {
+  name: 'OperationGuide',
+  components: { AnnotatedImage, DetectionStatus, ExecutionEvidence },
+  props: {
+    steps: { type: Array, default: () => [] }, stepIndex: { type: Number, default: 0 },
+    imageContext: { type: Object, default: () => ({}) }, confirmed: { type: Array, default: () => [] },
+    executing: Boolean, timingInterrupted: Boolean, timingAdvanceLimit: { type: Number, default: Infinity }, navigationLocked: Boolean, voiceAlertsEnabled: Boolean, executionStatus: { type: Number, default: null }, stationName: { type: String, default: '' },
+    liveEnabled: { type: Boolean, default: true }, recordsMode: Boolean, evidenceSteps: { type: Array, default: () => [] },
+    detectionStatus: { type: Object, default: () => ({ code: 'idle', text: '待开工' }) }
+  },
+  data() { return { timeoutVoiceError: '', clock: performance.now(), timingBase: performance.now(), visualMode: this.recordsMode ? 'evidence' : 'live', imageIndex: 0, expanded: false, stageWidth: 0, stageHeight: 0, imageWidth: 16, imageHeight: 9 } },
+  computed: {
+    timingSignature() { return JSON.stringify([this.imageContext.executionId, this.evidenceSteps.map(row => [row.position, row.elapsed_ms, row.remaining_ms, row.timing_running])]) },
+    step() { return this.steps[this.stepIndex] || null },
+    hasLive() { return this.liveEnabled && !!(this.$slots.live || this.$scopedSlots.live) },
+    evidence() { return (this.evidenceSteps[this.stepIndex] || {}).evidence || null },
+    automaticStep() { return !!(this.step && this.step.detection && this.step.detection.enabled) },
+    stepParameters() {
+      if (!this.step) return []
+      const seconds = Number(this.step.expected_duration_seconds) || 0
+      return [{ label: '作业时限', value: seconds > 0 ? seconds + ' 秒' : '不限时' }, { label: '执行方式', value: this.automaticStep ? '自动检测' : '人工确认' }]
+    },
+    detectionRequirements() {
+      const image = stepImage(this.step)
+      if (!this.automaticStep || !image || !image.visual) return []
+      return (image.visual.detection_regions || []).filter(region => region.enabled !== false).map((region, i) => ({ id: region.id || i, lines: regionRequirements(region) }))
+    },
+    images() { if (this.step && Object.prototype.hasOwnProperty.call(this.step, 'image')) { const image = stepImage(this.step); return image ? [image] : [] } return this.step && this.step.attachments ? this.step.attachments : [] },
+    image() { return this.images[this.imageIndex] || null },
+    imageIdentity() { return [this.imageContext.executionId, this.imageContext.taskId, this.step && this.step.id, this.image && this.image.id].join(':') },
+    imageStyle() {
+      if (!this.stageWidth || !this.stageHeight) return { width: '100%' }
+      const width = this.image && this.image.visual ? this.image.visual.image_width : this.imageWidth
+      const height = this.image && this.image.visual ? this.image.visual.image_height : this.imageHeight
+      return { width: Math.max(1, Math.min(this.stageWidth - 32, (this.stageHeight - 32) * width / height)) + 'px' }
+    },
+    completedCount() { return this.confirmed.filter(Boolean).length }
+  },
+  mounted() {
+    this._timeoutAttempts = new Set()
+    this._clockTimer = setInterval(() => { this.clock = performance.now(); this.checkTimeoutVoice() }, 250)
+    this.measure()
+    if (typeof ResizeObserver !== 'undefined') { this.stageObserver = new ResizeObserver(this.measure); this.stageObserver.observe(this.$refs.stage) }
+    window.addEventListener('resize', this.measure)
+  },
+  beforeDestroy() { this.stopTimeoutVoice(); clearInterval(this._clockTimer); if (this.stageObserver) this.stageObserver.disconnect(); window.removeEventListener('resize', this.measure) },
+  watch: { timingSignature() { this.timingBase = this.clock = performance.now() }, recordsMode(value) { this.visualMode = value ? 'evidence' : 'live' }, visualMode() { this.$nextTick(this.measure) }, imageIndex() { this.imageWidth = 16; this.imageHeight = 9 }, stepIndex() { this.imageIndex = 0; this.expanded = false }, steps() { this.imageIndex = 0; this.expanded = false } },
+  methods: {
+    timeoutTarget() {
+      if (!this.voiceAlertsEnabled || !this.executing || this.recordsMode || this.executionStatus !== 0 || !this.imageContext.executionId) return null
+      const index = this.evidenceSteps.findIndex(row => row.timing_running && !row.confirmed_at)
+      if (index < 0 || this.confirmed[index]) return null
+      const step = this.steps[index]; const row = this.evidenceSteps[index]
+      if (!step || step.voice_enabled === false || Number(step.voice_enabled) === 0 || row.elapsed_ms == null) return null
+      const seconds = Number(step.expected_duration_seconds) || 0
+      if (seconds <= 0 || Number(row.elapsed_ms) + Math.min(this.timingAdvanceLimit, Math.max(0, this.clock - this.timingBase)) < seconds * 1000) return null
+      return { key: 'sop-timeout:' + this.imageContext.executionId + ':' + String(step.id || index + 1), text: '步骤“' + (step.title || String(index + 1)) + '”作业时间已到，请注意。' }
+    },
+    stopTimeoutVoice() {
+      if (this._timeoutUtterance && window.speechSynthesis) {
+        if (!this._timeoutUtterance._sopStarted && this._timeoutAttempts) this._timeoutAttempts.delete(this._timeoutKey)
+        this._timeoutUtterance.onstart = this._timeoutUtterance.onend = this._timeoutUtterance.onerror = null
+        window.speechSynthesis.cancel()
+      }
+      this._timeoutUtterance = null; this._timeoutKey = null
+    },
+    checkTimeoutVoice(retry = false) {
+      const target = this.timeoutTarget()
+      if (!target || (this._timeoutKey && this._timeoutKey !== target.key)) { this.stopTimeoutVoice(); this.timeoutVoiceError = '' }
+      if (!target) return
+      if (!retry && this._timeoutAttempts.has(target.key)) return
+      try { if (!retry && sessionStorage.getItem(target.key) === 'spoken') return } catch (error) { /* Storage may be disabled. */ }
+      this.stopTimeoutVoice(); this.timeoutVoiceError = ''
+      this._timeoutAttempts.add(target.key)
+      if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) { this.timeoutVoiceError = '浏览器不支持语音提醒'; return }
+      const utterance = new window.SpeechSynthesisUtterance(target.text)
+      utterance.lang = 'zh-CN'; this._timeoutUtterance = utterance; this._timeoutKey = target.key
+      utterance.onstart = () => { if (this._timeoutUtterance === utterance) { utterance._sopStarted = true; try { sessionStorage.setItem(target.key, 'spoken') } catch (error) { /* Keep the in-memory reminder guard. */ } } }
+      utterance.onend = () => { if (this._timeoutUtterance === utterance) this._timeoutUtterance = null }
+      utterance.onerror = () => { if (this._timeoutUtterance === utterance) { this._timeoutUtterance = null; this.timeoutVoiceError = '到时语音未播放，请检查浏览器声音权限' } }
+      try { window.speechSynthesis.speak(utterance) } catch (error) { utterance.onerror() }
+    },
+    stepTiming(index) {
+      const row = this.evidenceSteps[index] || {}
+      const format = seconds => { const value = Math.max(0, Math.floor(seconds)); return String(Math.floor(value / 60)).padStart(2, '0') + ':' + String(value % 60).padStart(2, '0') }
+      if (row.elapsed_ms == null) return { text: this.confirmed[index] ? '已完成 · 用时 —' : this.stepState(index), type: this.confirmed[index] ? 'done' : 'pending' }
+      const advance = row.timing_running ? Math.min(this.timingAdvanceLimit, Math.max(0, this.clock - this.timingBase)) : 0
+      const elapsed = (Number(row.elapsed_ms) + advance) / 1000
+      if (this.confirmed[index]) return { text: '已完成 · 用时 ' + format(elapsed), type: 'done' }
+      if (this.executionStatus === 3) return { text: '已中止 · 用时 ' + format(elapsed), type: 'over' }
+      const limit = Number((this.steps[index] || {}).expected_duration_seconds) || 0
+      const remaining = row.remaining_ms == null ? limit - elapsed : (Number(row.remaining_ms) - advance) / 1000
+      const text = limit > 0 ? (remaining > 0 ? '剩余 ' + format(Math.ceil(remaining)) : '超时 ' + format(-remaining)) : '用时 ' + format(elapsed)
+      if (this.executionStatus === 1) return { text: '已暂停 · ' + text, type: 'paused' }
+      if (this.timingInterrupted && !this.recordsMode && this.executionStatus === 0) return { text: '已中断 · ' + text, type: 'paused' }
+      return { text, type: limit > 0 && remaining <= 0 ? 'over' : limit > 0 && remaining <= Math.min(5, limit * 0.2) ? 'near' : 'running' }
+    },
+    measure() { if (this.$refs.stage) { this.stageWidth = this.$refs.stage.clientWidth; this.stageHeight = this.$refs.stage.clientHeight } },
+    imageLoaded(size) { this.imageWidth = size.width; this.imageHeight = size.height; this.measure() },
+    select(index) { if (!this.navigationLocked && Number.isInteger(index) && index >= 0 && index < this.steps.length) this.$emit('select', index) },
+    stepState(index) { return this.confirmed[index] ? '已确认' : index === this.stepIndex ? (this.executing ? '当前步骤' : '正在查看') : (this.executing ? '待操作' : '操作步骤') }
+  }
+}
+
+guide.render=new Function("with(this){return _c('section',{staticClass:\"operation-guide\"},[_c('div',{staticClass:\"operation-layout\"},[(hasLive)?_c('main',{directives:[{name:\"show\",rawName:\"v-show\",value:(visualMode === 'live'),expression:\"visualMode === 'live'\"}],staticClass:\"operation-visual operation-live\"},[_c('div',{staticClass:\"operation-panel-heading\"},[_c('strong',[_v(\"实时摄像头画面\")]),_c('div',{staticClass:\"operation-live-actions\"},[_c('detection-status',{attrs:{\"status\":detectionStatus}}),(automaticStep)?_c('el-tooltip',{attrs:{\"content\":\"全部检测条件满足后，自动进入下一步\",\"placement\":\"top\"}},[_c('span',{staticClass:\"operation-auto-tag\"},[_v(\"自动\")])]):_e(),_c('el-button',{attrs:{\"type\":\"text\"},on:{\"click\":function($event){visualMode = 'reference'}}},[_v(\"查看参考图\")])],1)]),_t(\"live\",null,{\"active\":visualMode === 'live'})],2):_e(),_v(\" \"),_c('main',{directives:[{name:\"show\",rawName:\"v-show\",value:(recordsMode ? visualMode === 'reference' : !hasLive || visualMode === 'reference'),expression:\"recordsMode ? visualMode === 'reference' : !hasLive || visualMode === 'reference'\"}],staticClass:\"operation-visual\"},[_c('div',{staticClass:\"operation-panel-heading\"},[_c('div',{staticClass:\"operation-image-title\"},[_c('span',{staticClass:\"operation-step-counter\"},[_v(_s(stepIndex + 1)+\" / \"+_s(steps.length))]),_c('strong',[_v(_s(step ? step.title : '图像引导'))])]),(recordsMode || hasLive)?_c('el-button',{attrs:{\"type\":\"text\"},on:{\"click\":function($event){visualMode = recordsMode ? 'evidence' : 'live'}}},[_v(_s(recordsMode ? '返回现场照片' : '返回实时画面'))]):_e(),(image)?_c('el-button',{attrs:{\"type\":\"text\",\"icon\":\"el-icon-full-screen\"},on:{\"click\":function($event){expanded = true}}},[_v(\"放大查看\")]):_e()],1),_c('div',{ref:\"stage\",staticClass:\"operation-image-stage\",class:{ 'has-image': !!image }},[(image)?_c('annotated-image',_b({key:imageIdentity,staticClass:\"operation-image\",style:(imageStyle),attrs:{\"file-id\":String(image.file_id),\"visual\":image.visual || null,\"show-detection\":executing},on:{\"loaded\":imageLoaded}},'annotated-image',imageContext,false)):_c('div',{staticClass:\"operation-image-empty\"},[_c('i',{staticClass:\"el-icon-camera\"}),_c('strong',[_v(\"当前步骤暂无参考图片\")]),_c('span',[_v(\"请按照右侧文字要求操作\")])])],1),_c('div',{staticClass:\"operation-image-caption\"},[_c('span',[_c('i',{staticClass:\"el-icon-picture-outline\"}),_v(\" \"+_s(image && image.caption ? image.caption : '工位区域参考图'))]),_c('small',[_v(\"参考图片 · 非实时画面\")])]),(images.length > 1)?_c('div',{staticClass:\"operation-image-options\"},_l((images),function(item,i){return _c('button',{key:item.id,class:{ active: imageIndex === i },on:{\"click\":function($event){imageIndex = i}}},[_v(_s(item.caption || '参考图 ' + (i + 1)))])}),0):_e()]),_v(\" \"),(recordsMode && visualMode !== 'reference')?_c('main',{staticClass:\"operation-visual\"},[_c('div',{staticClass:\"operation-panel-heading\"},[_c('strong',[_v(\"现场留存照片\")]),_c('el-button',{attrs:{\"type\":\"text\"},on:{\"click\":function($event){visualMode = 'reference'}}},[_v(\"查看参考图\")])],1),_c('execution-evidence',{attrs:{\"execution-id\":String(imageContext.executionId),\"position\":stepIndex + 1,\"photo\":evidence,\"step\":step}})],1):_e(),_v(\" \"),_c('aside',{staticClass:\"operation-sidebar\",attrs:{\"aria-label\":\"步骤流程与操作说明\"}},[_c('section',{staticClass:\"operation-flow\",attrs:{\"aria-label\":\"步骤流程\"}},[_c('div',{staticClass:\"operation-panel-heading\"},[_c('strong',[_v(\"步骤流程\")]),(executing)?_c('span',{staticClass:\"flow-progress\",class:{ complete: completedCount === steps.length }},[_v(\"已完成 \"+_s(completedCount)+\"/\"+_s(steps.length))]):_c('span',[_v(_s(steps.length)+\" 步\")])]),_c('nav',{attrs:{\"aria-label\":\"作业步骤流程\"}},_l((steps),function(item,i){return _c('button',{key:item.id,class:{ active: stepIndex === i, confirmed: confirmed[i] },attrs:{\"disabled\":navigationLocked && stepIndex !== i,\"aria-current\":stepIndex === i ? 'step' : null},on:{\"click\":function($event){return select(i)}}},[_c('span',{staticClass:\"flow-number\"},[(confirmed[i])?_c('i',{staticClass:\"el-icon-check\"}):[_v(_s(i + 1))]],2),_c('span',{staticClass:\"flow-text\"},[_c('strong',[_v(_s(item.title))]),_c('small',{class:'timing-' + stepTiming(i).type},[_v(_s(stepTiming(i).text))])]),(stepIndex === i)?_c('i',{staticClass:\"el-icon-arrow-right\"}):_e()])}),0)]),_v(\" \"),_c('section',{staticClass:\"operation-instructions\",attrs:{\"aria-label\":\"操作说明\"}},[_m(0),(step)?_c('div',{staticClass:\"operation-instruction-body\"},[_c('section',[_c('p',[_v(_s(step.instruction || '暂无操作说明'))])]),(timeoutVoiceError)?_c('section',{staticClass:\"instruction-warning\",attrs:{\"role\":\"status\"}},[_c('p',[_v(_s(timeoutVoiceError))]),_c('el-button',{attrs:{\"type\":\"text\"},on:{\"click\":function($event){return checkTimeoutVoice(true)}}},[_v(\"重播提醒\")])],1):_e(),_c('section',{staticClass:\"instruction-parameters\"},[_c('h3',[_v(\"步骤参数\")]),_c('dl',[_l((stepParameters),function(param){return [_c('dt',{key:param.label + '-label'},[_v(_s(param.label))]),_c('dd',{key:param.label},[_v(_s(param.value))])]})],2)]),(detectionRequirements.length)?_c('section',{staticClass:\"instruction-detection\"},[_c('h3',[_v(\"检测要求\")]),_l((detectionRequirements),function(requirement,r){return _c('div',{key:requirement.id,staticClass:\"instruction-target\"},[(detectionRequirements.length > 1)?_c('strong',[_v(\"区域 \"+_s(r + 1))]):_e(),_l((requirement.lines),function(line){return _c('p',{key:line},[_v(_s(line))])})],2)})],2):_e(),(step.precautions)?_c('section',{staticClass:\"instruction-warning\"},[_m(1),_c('p',[_v(_s(step.precautions))])]):_e(),(step.check_requirements)?_c('section',[_m(2),_c('p',[_v(_s(step.check_requirements))])]):_e(),(step.workplace_requirements)?_c('section',[_m(3),_c('p',[_v(_s(step.workplace_requirements))])]):_e(),(step.resource_requirements && step.resource_requirements.length)?_c('section',[_m(4),_l((step.resource_requirements),function(req){return _c('p',{key:req.model_id},[_v(_s(req.name)),(req.specification)?_c('small',[_v(\" · \"+_s(req.specification))]):_e(),_v(\" × \"+_s(req.quantity)+\" \"+_s(req.unit)),(req.description)?_c('span',[_v(\"；\"+_s(req.description))]):_e()])})],2):_e()]):_e()])])]),_v(\" \"),_c('footer',{staticClass:\"operation-controls\"},[_c('div',{staticClass:\"operation-control-note\"},[_t(\"status\",[_c('i',{staticClass:\"el-icon-info\"}),_v(\"按步骤查看图像与文字指导\")])],2),_c('div',{staticClass:\"operation-control-buttons\"},[(!navigationLocked)?_c('el-button',{attrs:{\"disabled\":stepIndex === 0,\"icon\":\"el-icon-arrow-left\"},on:{\"click\":function($event){return select(stepIndex - 1)}}},[_v(\"上一步\")]):_e(),_t(\"confirm\"),(!navigationLocked)?_c('el-button',{attrs:{\"disabled\":stepIndex >= steps.length - 1},on:{\"click\":function($event){return select(stepIndex + 1)}}},[_v(\"下一步\"),_c('i',{staticClass:\"el-icon-arrow-right el-icon--right\"})]):_e()],2)]),_v(\" \"),_c('el-dialog',{attrs:{\"title\":\"图像引导\",\"visible\":expanded,\"fullscreen\":\"\",\"append-to-body\":\"\"},on:{\"update:visible\":function($event){expanded=$event}}},[(expanded && image)?_c('div',{staticClass:\"operation-expanded\"},[_c('annotated-image',_b({key:imageIdentity,staticClass:\"operation-expanded-image\",attrs:{\"file-id\":String(image.file_id),\"visual\":image.visual || null,\"show-detection\":executing}},'annotated-image',imageContext,false))],1):_e()])],1)}");guide.staticRenderFns=["with(this){return _c('div',{staticClass:\"operation-panel-heading\"},[_c('strong',[_v(\"操作说明\")]),_c('i',{staticClass:\"el-icon-document\"})])}","with(this){return _c('h3',[_c('i',{staticClass:\"el-icon-warning-outline\"}),_v(\"注意事项\")])}","with(this){return _c('h3',[_c('i',{staticClass:\"el-icon-circle-check\"}),_v(\"检查要求\")])}","with(this){return _c('h3',[_c('i',{staticClass:\"el-icon-office-building\"}),_v(\"环境要求\")])}","with(this){return _c('h3',[_c('i',{staticClass:\"el-icon-set-up\"}),_v(\"工具与设备\")])}"].map(source=>new Function(source));
+const row={position:1,elapsed_ms:0,remaining_ms:30000,timing_running:true};
+const app=new Vue({data:{rows:[{...row}]},render(h){return h(guide,{props:{steps:[{id:'1',title:'检测杯子',expected_duration_seconds:30,instruction:'放入区域',attachments:[]}],evidenceSteps:this.rows,executing:true,executionStatus:0}})}}).$mount('#app');
+const rows=[],start=performance.now();let saved=0;const refresh=setInterval(()=>{app.rows=app.rows.map(value=>({...value}))},250);const save=setInterval(()=>{const elapsed=Math.round(performance.now()-start);saved++;app.rows=[{...row,elapsed_ms:elapsed,remaining_ms:30000-elapsed}]},5000);
+let second=0;const sample=setInterval(()=>{second++;rows.push(second+'s: '+document.querySelector('.timing-running').textContent);document.querySelector('#status').textContent=rows.join('
+')+'
+Backend saves: '+saved;if(second===7){clearInterval(refresh);clearInterval(save);clearInterval(sample);const values=rows.map(value=>value.match(/00:(d+)/)[1]);document.querySelector('#status').textContent+='
+'+(new Set(values).size>=6&&saved===1?'PASS: continuous seconds, one save per five seconds.':'FAIL: timer did not advance.')}},1000);
+</script>

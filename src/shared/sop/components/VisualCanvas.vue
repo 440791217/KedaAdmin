@@ -45,7 +45,7 @@
           <div xmlns="http://www.w3.org/1999/xhtml" :style="{fontSize:`${fontSize}px`,color:item.color,whiteSpace:'pre-wrap',overflowWrap:'anywhere',overflow:'hidden',height:'100%',padding:`${lineWidth*2}px`}">{{ item.text }}</div>
         </foreignObject>
         <text
-          v-else
+          v-else-if="!item.detect_type"
           :x="item.x * width + lineWidth * 2"
           :y="item.y * height + fontSize"
           :font-size="fontSize"
@@ -54,6 +54,7 @@
         >
           {{ item.kind === 'text' ? item.text : item.name }}
         </text>
+        <region-label v-if="item.detect_type" :region="item" :width="width" :height="height" :font-size="fontSize" :placement="regionPlacements.find(label => label.id === item.id)" />
         <template v-if="!readonly && item.id === selectedId && item.kind !== 'arrow'">
           <rect
             v-for="corner in corners"

@@ -1,6 +1,12 @@
 .execution-panel { background: #f4f6f9; padding: 0; border-radius: 8px; }
-.execution-heading { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; padding: 18px 22px; background: #fff; border: 1px solid #e3e9f1; border-radius: 8px; h3 { margin: 0; font-size: 19px; } p { color: #63758d; font-size: 13px; line-height: 1.8; margin: 8px 0 0; overflow-wrap: anywhere; } }
-.execution-confirmed { color: #1b9955; }
-.execution-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 16px 0; .el-button { margin-left: 0; } }
-.execution-events { border-top: 1px solid #e3e9f1; padding-top: 16px; font-size: 13px; color: #63758d; line-height: 1.8; overflow-wrap: anywhere; summary { cursor: pointer; } }
-@media(max-width: 900px) { .execution-heading { flex-direction: column; } }
+.execution-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; padding: 16px 18px; background: #fff; border: 1px solid #e3e9f1; border-radius: 7px; p { color: #63758d; font-size: 12px; line-height: 1.7; margin: 7px 0 0; overflow-wrap: anywhere; span { display: inline-block; margin-left: 16px; } } .execution-meta { color: #8b98a9; margin-top: 3px; } }
+.execution-summary { min-width: 0; }
+.execution-title { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; h3 { margin: 0; font-size: 17px; line-height: 1.5; color: #30435b; overflow-wrap: anywhere; } }
+.execution-version { color: #7d8b9e; font-size: 12px; }
+.execution-progress { color: #7a8ba0; font-size: 12px; &.is-paused { color: #b47b22; } }
+.execution-auto-status { align-self: center; font-size: 12px; color: #718399; }
+.execution-reason-hint { font-size: 13px; color: #78889b; line-height: 1.7; margin: 0 0 14px; }
+.execution-panel ::v-deep .operation-control-note { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; .el-button { margin-left: 0; font-size: 12px; } .execution-progress { margin-left: 4px; } }
+.execution-panel ::v-deep .operation-control-buttons .el-button { font-size: 13px; }
+.execution-events { padding: 12px 4px 0; font-size: 12px; color: #7e8da0; line-height: 1.8; overflow-wrap: anywhere; summary { cursor: pointer; } }
+@media(max-width: 650px) { .execution-heading { flex-wrap: wrap; padding: 14px; } .execution-heading p span { margin-left: 8px; } .execution-panel ::v-deep .operation-control-buttons { margin-left: auto; } }

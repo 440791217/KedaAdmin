@@ -1,3 +1,4 @@
+import FrameRateFields from '@/shared/resource/components/FrameRateFields.vue'
 import StationTasks from '../components/StationTasks.vue'
 import ConnectionFields from '@/shared/resource/components/ConnectionFields.vue'
 import {
@@ -20,7 +21,7 @@ import {
 import { createBusinessCode } from '@/utils/business_code'
 export default {
   name: 'ResourcePage',
-  components: { StationTasks, Pagination, ScannerInput, ConnectionFields },
+  components: { FrameRateFields, StationTasks, Pagination, ScannerInput, ConnectionFields },
   props: {
     kind: { type: String, required: true },
     title: { type: String, required: true }
@@ -190,6 +191,7 @@ export default {
             ip_address: ''
           }
         if (this.kind === 'device') {
+          this.$set(this.form, 'frame_rates', row && row.frame_rates ? { ...row.frame_rates } : { refresh_fps: null, detect_fps: null })
           this.$set(
             this.form,
             'connection',

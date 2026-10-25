@@ -1,7 +1,7 @@
 <template>
   <section class="execution-records">
     <header><h2>执行记录</h2><p>按产品码追溯操作人、工位、版本和步骤结果</p></header>
-    <template v-if="selected"><el-button class="records-back" @click="selected = ''; load()">返回记录列表</el-button><execution-panel :key="selected" :execution-id="selected" :readonly="!handling" /></template>
+    <template v-if="selected"><execution-panel :key="selected" :execution-id="selected" :readonly="!handling"><el-button slot="workspace-actions" size="small" icon="el-icon-back" @click="selected = ''; load()">返回记录列表</el-button></execution-panel></template>
     <template v-else>
       <el-form :inline="true" class="records-filters" @submit.native.prevent="load(true)">
         <el-form-item><el-input v-model="product" placeholder="产品码" clearable /></el-form-item>

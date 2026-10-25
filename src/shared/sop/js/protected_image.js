@@ -1,4 +1,4 @@
-import { fetchExecutionImage } from '@/api/execution'
+import { fetchExecutionImage, fetchExecutionEvidenceImage } from '@/api/execution'
 import { fetchTaskImage } from '@/api/resource'
 import { fetchSopImage, fetchBoundSopImage } from '@/api/sop'
 export default {
@@ -6,7 +6,8 @@ export default {
   props: {
     sopId: { type: String, default: '' },
     revisionId: { type: String, default: '' },
-    fileId: { type: String, required: true },
+    fileId: { type: String, default: '' },
+    evidencePosition: { type: Number, default: 0 },
     projectId: { type: String, default: '' },
     subprojectId: { type: String, default: '' },
     bindingId: { type: String, default: '' },
@@ -24,7 +25,7 @@ export default {
         this.fileId,
         this.projectId,
         this.subprojectId,
-        this.bindingId, this.taskId, this.executionId
+        this.bindingId, this.taskId, this.executionId, this.evidencePosition
       ].join(':')
     }
   },
@@ -51,7 +52,7 @@ export default {
       this.loading = true
       this.failed = false
       try {
-        const blob = this.executionId ? await fetchExecutionImage(this.executionId, this.fileId) : this.taskId ? await fetchTaskImage(this.projectId, this.subprojectId, this.taskId, this.fileId) : this.bindingId
+        const blob = this.executionId && this.evidencePosition ? await fetchExecutionEvidenceImage(this.executionId, this.evidencePosition) : this.executionId ? await fetchExecutionImage(this.executionId, this.fileId) : this.taskId ? await fetchTaskImage(this.projectId, this.subprojectId, this.taskId, this.fileId) : this.bindingId
           ? await fetchBoundSopImage(this.projectId, this.subprojectId, this.bindingId, this.fileId)
           : await fetchSopImage(this.sopId, this.revisionId, this.fileId)
         if (seq === this.sequence) this.url = URL.createObjectURL(blob)

@@ -1,24 +1,19 @@
-.drawer-container { max-width: 640px; margin: 24px; background: #fff; border: 1px solid #ebeef5; border-radius: 6px; }
 .drawer-container {
-  padding: 24px;
-  font-size: 14px;
-  line-height: 1.5;
-  word-wrap: break-word;
-
-  .drawer-title {
-    margin-bottom: 12px;
-    color: rgba(0, 0, 0, .85);
-    font-size: 14px;
-    line-height: 22px;
-  }
-
-  .drawer-item {
-    color: rgba(0, 0, 0, .65);
-    font-size: 14px;
-    padding: 12px 0;
-  }
-
-  .drawer-switch {
-    float: right
-  }
+  box-sizing: border-box;
+  max-width: 720px;
+  margin: 24px;
+  padding: 24px 28px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  color: #606266;
+  font-size: 13px;
+  line-height: 1.6;
 }
+.settings-heading { margin-bottom: 24px; }
+.settings-heading h3 { margin: 0; color: #303133; font-size: 16px; font-weight: 600; }
+.settings-heading p { margin: 5px 0 0; color: #909399; font-size: 12px; }
+.section-title { margin: 0 0 6px; color: #303133; font-size: 13px; font-weight: 600; }
+.drawer-item { display: flex; align-items: center; justify-content: space-between; min-height: 46px; gap: 16px; }
+.drawer-theme { height: 26px; }
+@media (max-width: 600px) { .drawer-container { margin: 12px; padding: 20px; } }

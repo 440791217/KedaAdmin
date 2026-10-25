@@ -178,7 +178,7 @@
               @command="handleCommand($event, scope.row)"
             >
               <el-button type="primary" plain size="mini" icon="el-icon-edit-outline" class="edit-action" :disabled="Boolean(busyId)">
-                编辑<i class="el-icon-arrow-down el-icon--right" />
+                操作<i class="el-icon-arrow-down el-icon--right" />
               </el-button>
               <el-dropdown-menu slot="dropdown" class="user-action-menu">
                 <el-dropdown-item

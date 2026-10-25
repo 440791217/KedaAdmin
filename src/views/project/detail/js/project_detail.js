@@ -1,12 +1,13 @@
 import SopTasks from '@/views/project/detail/components/SopTasks.vue'
 import EntityDialog from '@/shared/project/components/EntityDialog.vue'
 import ProjectMembers from '@/views/project/detail/components/ProjectMembers.vue'
+import ProjectStations from '@/views/project/detail/components/ProjectStations.vue'
 import ProjectActivity from '@/views/project/detail/components/ProjectActivity.vue'
 import OwnerTransfer from '@/views/project/detail/components/OwnerTransfer.vue'
 import { fetchProject, fetchSubprojects, fetchSubproject, setProjectStatus, deleteProject, setSubprojectStatus, deleteSubproject, sortSubprojects, restoreProject, restoreSubproject } from '@/api/project'
 import { statusLabels, statusTypes, nextStatuses } from '@/shared/project/js/project_helpers'
 export default {
-  name: 'ProjectDetail', components: { SopTasks, EntityDialog, ProjectMembers, ProjectActivity, OwnerTransfer },
+  name: 'ProjectDetail', components: { SopTasks, EntityDialog, ProjectMembers, ProjectStations, ProjectActivity, OwnerTransfer },
   data() { return { project: null, record: null, children: [], loading: false, busy: false, failed: false, dialog: false, selected: null, editingSub: false, sequence: 0, statusLabels, statusTypes, activeTab: 'children', ownerDialog: false, ownerEntity: null } },
   computed: {
     projectId() { return this.$route.params.projectId },

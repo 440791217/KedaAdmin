@@ -22,7 +22,7 @@ h2, h3 { margin: 0; } .workbench-header p, .guide-heading p { margin: 8px 0 0; c
 .execution-back { margin: 20px 0; }
 
 .workbench-guidance { --guide-height: calc(100vh - 276px); padding: 16px 20px; }
-.workbench-running { --guide-height: calc(100vh - 338px); }
+.workbench-running { --guide-height: calc(100vh - 294px); }
 .workbench-guidance .guide-heading { margin: 0 0 12px; min-height: 50px; gap: 14px; h3 { font-size: 17px; font-weight: 600; color: #32445d; } p { font-size: 12px; margin-top: 5px; } > .el-button { padding: 9px 13px; font-size: 12px; } }
 .guide-station-name { color: #7b8ca2; font-size: 14px; font-weight: 400; }
 .guide-title-divider { margin: 0 12px; color: #c6ced9; }
@@ -30,5 +30,5 @@ h2, h3 { margin: 0; } .workbench-header p, .guide-heading p { margin: 8px 0 0; c
 .scan-help { color: #93a3b8; cursor: help; font-size: 16px; }
 .execution-workspace-toolbar { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .workbench-focused { position: fixed; inset: 0; z-index: 1500; overflow: auto; overscroll-behavior: contain; padding: 16px 20px; --guide-height: calc(100vh - 164px); }
-.workbench-focused.workbench-running { --guide-height: calc(100vh - 238px); }
+.workbench-focused.workbench-running { --guide-height: calc(100vh - 194px); }
 @media(max-width: 850px) { .workbench-guidance { padding: 12px; } .workbench-guidance .guide-heading { flex-wrap: wrap; > div { flex-basis: 45%; } } }

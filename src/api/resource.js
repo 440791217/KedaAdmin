@@ -7,6 +7,7 @@ export const fetchResourceOwners = keyword => request({ url: '/resource/owner/op
 export const previewDevice = id => request({ url: `/resource/device/${id}/preview`, responseType: 'blob', timeout: 35000 })
 export const testCameraConnection = data => request({ url: '/resource/device/connection/test', method: 'post', data, responseType: 'blob', timeout: 35000 })
 export const snapshotDevice = id => request({ url: `/resource/device/${id}/snapshot`, method: 'post', responseType: 'blob', timeout: 35000 })
+export const fetchCameraCaptureConfig = id => request({ url: `/resource/device/${id}/capture-config` })
 const tasks = (pid, sid) => `/project/${pid}/subproject/${sid}/task`
 export const fetchTasks = (pid, sid) => request({ url: tasks(pid, sid) })
 export const saveTask = (pid, sid, data) => request({ url: tasks(pid, sid) + (data.id ? '/' + data.id : ''), method: data.id ? 'put' : 'post', data })

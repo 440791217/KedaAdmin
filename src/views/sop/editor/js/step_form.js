@@ -11,7 +11,9 @@ export default {
         instruction: '',
         precautions: '',
         check_requirements: '',
-        expected_duration_seconds: undefined,
+        expected_duration_seconds: 0,
+        voice_enabled: true,
+        voice_text: '',
         ...this.step
       }
       this.$nextTick(() => this.$refs.form.clearValidate())
@@ -26,6 +28,8 @@ export default {
           instruction: this.form.instruction.trim(),
           precautions: this.form.precautions || null,
           check_requirements: this.form.check_requirements || null,
+          voice_enabled: !!Number(this.form.voice_enabled),
+          voice_text: this.step ? this.form.voice_text || null : (this.form.voice_text || this.form.instruction).trim().slice(0, 1000),
           expected_duration_seconds:
             this.form.expected_duration_seconds == null ? null : this.form.expected_duration_seconds
         })

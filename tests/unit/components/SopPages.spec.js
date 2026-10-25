@@ -82,7 +82,7 @@ describe('SOP pages and their HTTP contracts', () => {
     const w = page(SopEditor); await flush()
     request.mockResolvedValueOnce({ data: revision({ version: 1, steps: [step()] }) })
     await w.vm.saveStep({ title: '检查设备', instruction: '切断电源后检查' }); await flush()
-    expect(w.text()).toContain('切断电源后检查')
+    expect(w.findAll('textarea').wrappers.some(field => field.element.value === '切断电源后检查')).toBe(true)
     expect(request).toHaveBeenLastCalledWith(expect.objectContaining({ url: '/sop/7/version/8/step', method: 'post', data: expect.objectContaining({ version: 0 }) }))
     request.mockResolvedValueOnce({ data: revision({ version: 2, steps: [step()] }) })
     await w.vm.upload(step(), { file: new File(['png'], 'step.png', { type: 'image/png' }) }); await flush()
@@ -136,7 +136,7 @@ describe('SOP pages and their HTTP contracts', () => {
       return Promise.resolve({ data: { items: [binding()], target_version: 5, can_manage: true }})
     })
     const w = page(ProjectDetail, {}, { params: { projectId: '1' }, fullPath: '/project/1' }); await flush()
-    expect(w.text()).toContain('子项目'); expect(w.text()).toContain('项目成员'); expect(w.text()).not.toContain('关联 SOP'); expect(w.text()).not.toContain('SOP任务'); expect(request.mock.calls.some(([c]) => /\/sop\/list$|\/task$/.test(c.url))).toBe(false)
+    expect(w.text()).toContain('子项目'); expect(w.text()).toContain('项目成员'); expect(w.text()).not.toContain('关联 SOP'); expect(w.findAll('.el-tabs__item').wrappers.map(tab => tab.text())).not.toContain('SOP任务'); expect(request.mock.calls.some(([c]) => /\/sop\/list$|\/task$/.test(c.url))).toBe(false)
   })
   it('shows SOP tasks only under the subproject without a separate association tab', async() => {
     request.mockImplementation(c => {

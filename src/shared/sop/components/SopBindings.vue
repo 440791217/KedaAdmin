@@ -63,7 +63,7 @@
         plain
         type="primary"
         :disabled="busy"
-      >编辑<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
+      >操作<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
         slot="dropdown"
       ><el-dropdown-item v-if="row.status === 1" command="preview">查看标准</el-dropdown-item><el-dropdown-item v-if="canManage" command="change">{{
         row.status === 1 ? '切换版本' : '重新关联'

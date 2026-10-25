@@ -8,7 +8,6 @@
 </template>
 
 <script>
-const version = require('element-ui/package.json').version // element-ui version from node_modules
 const ORIGINAL_THEME = '#409EFF' // default color
 
 export default {
@@ -35,10 +34,9 @@ export default {
       if (typeof val !== 'string') return
       const themeCluster = this.getThemeCluster(val.replace('#', ''))
       const originalCluster = this.getThemeCluster(oldVal.replace('#', ''))
-      console.log(themeCluster, originalCluster)
 
       const $message = this.$message({
-        message: '  Compiling the theme',
+        message: '正在应用主题',
         customClass: 'theme-message',
         type: 'success',
         duration: 0,
@@ -61,7 +59,7 @@ export default {
       }
 
       if (!this.chalk) {
-        const url = `https://unpkg.com/element-ui@${version}/lib/theme-chalk/index.css`
+        const url = process.env.BASE_URL + 'vendor/element-theme.css'
         await this.getCSSString(url, 'chalk')
       }
 

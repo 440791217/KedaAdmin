@@ -1,0 +1,14 @@
+const fs=require('fs'),http=require('http'),compiler=require('vue-template-compiler');
+const template=fs.readFileSync('src/shared/execution/components/OperationGuide.vue','utf8').match(/<template>([\s\S]*?)<\/template>\s*<script/)[1];
+const compiled=compiler.compile(template);if(compiled.errors.length)throw Error(compiled.errors.join('\n'));
+const logic=fs.readFileSync('src/shared/execution/js/operation_guide.js','utf8').replace(/^import .*\r?\n/gm,'').replace('export default','const guide =');
+const html=`<!doctype html><meta charset="utf-8"><title>Continuous countdown verification</title><style>body{font:16px sans-serif;padding:20px;background:#f2f6fb}#status{white-space:pre-wrap}.operation-visual,.operation-controls,el-dialog{display:none}.operation-sidebar{display:flex;gap:60px;background:white;padding:24px}.timing-running{color:#1875ca;font-size:18px}</style><h1>Continuous countdown verification</h1><pre id="status">Running actual Vue countdown...</pre><div id="app"></div><script src="/vue.js"></script><script>
+const stepImage=()=>null,regionRequirements=()=>[];const AnnotatedImage={render:h=>h('div')},DetectionStatus={render:h=>h('div')},ExecutionEvidence={render:h=>h('div')};
+${logic}
+guide.render=new Function(${JSON.stringify(compiled.render)});guide.staticRenderFns=${JSON.stringify(compiled.staticRenderFns)}.map(source=>new Function(source));
+const row={position:1,elapsed_ms:0,remaining_ms:30000,timing_running:true};
+const app=new Vue({data:{rows:[{...row}]},render(h){return h(guide,{props:{steps:[{id:'1',title:'检测杯子',expected_duration_seconds:30,instruction:'放入区域',attachments:[]}],evidenceSteps:this.rows,executing:true,executionStatus:0}})}}).$mount('#app');
+const rows=[],start=performance.now();let saved=0;const refresh=setInterval(()=>{app.rows=app.rows.map(value=>({...value}))},250);const save=setInterval(()=>{const elapsed=Math.round(performance.now()-start);saved++;app.rows=[{...row,elapsed_ms:elapsed,remaining_ms:30000-elapsed}]},5000);
+let second=0;const sample=setInterval(()=>{second++;rows.push(second+'s: '+document.querySelector('.timing-running').textContent);document.querySelector('#status').textContent=rows.join(String.fromCharCode(10))+String.fromCharCode(10)+'Backend saves: '+saved;if(second===7){clearInterval(refresh);clearInterval(save);clearInterval(sample);const values=rows.map(value=>value.slice(-2));document.querySelector('#status').textContent+=String.fromCharCode(10)+(new Set(values).size>=6&&saved===1?'PASS: continuous seconds, one save per five seconds.':'FAIL: timer did not advance.')}},1000);
+</script>`;
+http.createServer((req,res)=>{if(req.url==='/vue.js'){res.setHeader('Content-Type','text/javascript');res.end(fs.readFileSync(require.resolve('vue/dist/vue.min.js')))}else{res.setHeader('Content-Type','text/html;charset=utf-8');res.end(html)}}).listen(18094,'127.0.0.1');

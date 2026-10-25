@@ -27,6 +27,10 @@
 .authoring-images, .authoring-tools { display: flex; align-items: center; flex-wrap: wrap; padding: 10px 14px; gap: 7px; border-bottom: 1px solid #e9eef5; background: #fafbfd; }
 .authoring-images .el-button + .el-button, .authoring-tools .el-button + .el-button { margin-left: 0; }
 .authoring-images .el-button { max-width: 180px; overflow: hidden; text-overflow: ellipsis; border-radius: 5px; }
+.authoring-image-select { width: 210px; max-width: 100%; }
+.image-picker-option { display: flex; align-items: center; gap: 10px; height: 56px; line-height: 1.5; small { color: #909399; } }
+.image-picker-thumb { flex: 0 0 64px; width: 64px; height: 44px; overflow: hidden; pointer-events: none; }
+.image-picker-thumb ::v-deep .el-image { width: 64px; height: 44px; }
 .authoring-tools .el-button { border-radius: 4px; border-color: #e1e7f0; }
 .authoring-canvas-scroll { position: relative; flex: 1; overflow: auto; background-color: #f0f3f8; background-image: radial-gradient(#cbd5e2 .7px,transparent .7px); background-size: 18px 18px; padding: 24px; min-height: 200px; }
 .authoring-canvas-scroll > div:not(.authoring-empty) { background: #fff; box-shadow: 0 4px 24px #283e5912; }
@@ -42,13 +46,17 @@
 .authoring-properties ::v-deep .el-tabs__item { height: 55px; line-height: 55px; font-size: 13px; color: #8190a5; &.is-active { color: #3478e7; font-weight: 500; } }
 .authoring-properties ::v-deep .el-tabs__nav-wrap::after { height: 1px; background: #edf0f5; }
 .authoring-properties .el-form { padding: 0 18px 20px; }
-.authoring-properties .el-form-item { margin-bottom: 19px; }
+.authoring-properties .el-form-item { margin-bottom: 13px; }
 .authoring-properties ::v-deep .el-form-item__label { font-size: 12px; font-weight: 500; color: #61738b; line-height: 1.6; padding-bottom: 9px; }
 .authoring-properties ::v-deep .el-input__inner, .authoring-properties ::v-deep .el-textarea__inner { border: 1px solid #e0e7f0; background: #fafbfd; border-radius: 5px; color: #40536d; font-size: 13px; transition: border-color .15s,background .15s; &:hover { border-color: #c3d0e1; } &:focus { background: #fff; border-color: #7aa8ef; } }
 .authoring-properties ::v-deep .el-textarea__inner { line-height: 1.8; padding: 9px 11px; }
 .authoring-properties ::v-deep .el-input-number { width: 100%; max-width: 170px; }
 .authoring-hint { font-size: 11px; color: #94a2b6; line-height: 1.8; }
 .authoring-properties .el-select { width: 100%; }
+.authoring-properties ::v-deep .el-input__inner { font-size: 12px; }
+.authoring-properties ::v-deep .el-form-item__label { padding-bottom: 5px; }
+.authoring-properties ::v-deep .el-button--small, .authoring-properties ::v-deep .el-button--text { font-size: 12px; }
+.detection-requirement { padding: 9px 10px; margin: 0 0 12px; background: #f3f7fc; border: 1px solid #e4ebf5; border-radius: 5px; font-size: 12px; line-height: 1.7; color: #526880; span { font-weight: 500; } p { margin: 3px 0 0; } &.inactive { color: #909399; background: #f7f8fa; } }
 .sop-authoring > .el-alert { margin-top: 12px; }
 @media(max-width: 1200px) { .authoring-columns { grid-template-columns: 200px minmax(330px,1fr) 270px; } .sop-authoring { padding: 12px; } }
 @media(max-width: 900px) { .authoring-columns { grid-template-columns: 180px minmax(300px,1fr); height: auto; min-height: 650px; } .authoring-properties { grid-column: 1 / -1; max-height: 600px; } .authoring-center { min-height: 550px; } .authoring-steps { max-height: 700px; } }

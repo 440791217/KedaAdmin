@@ -33,6 +33,9 @@ router.beforeEach(async(to, from, next) => {
       NProgress.done()
       return
     }
+    if (!store.state.settings.systemLoaded && !store.state.settings.systemLoading) {
+      store.dispatch('settings/loadSystemDefaults').catch(() => {})
+    }
     if (!store.getters.routes_ready) {
       const routes = await store.dispatch('permission/generateRoutes', store.getters.roles)
       router.addRoutes(routes)

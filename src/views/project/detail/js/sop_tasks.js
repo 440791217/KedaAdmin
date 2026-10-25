@@ -15,6 +15,7 @@ export default {
     taskRowClass({ row }) { return row.id === this.$route.query.task_id ? 'task-current-row' : '' },
     async command(action, row) {
       if (this.busy) return
+      if (action === 'open') return this.open(row)
       if (action === 'delete') {
         if (!this.canDelete || this.loading) return
         this.busy = true

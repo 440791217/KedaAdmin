@@ -216,7 +216,9 @@ export default {
           this.revisionId,
           step.id,
           request.file,
-          this.revision.version
+          this.revision.version,
+          request.cameraId,
+          request.replaceAttachmentId
         )
         this.accept(data)
         if (request.onSuccess) request.onSuccess(data)

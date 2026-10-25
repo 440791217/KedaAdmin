@@ -7,7 +7,7 @@
           <el-button icon="el-icon-back" @click="$router.push(isSub ? `/project/${projectId}` : '/project/list')">返回{{ isSub ? '项目' : '列表' }}</el-button>
           <el-button icon="el-icon-refresh" :disabled="busy" @click="load">刷新</el-button>
           <el-dropdown v-if="record" trigger="click" @command="command($event, record, isSub)">
-            <el-button type="primary" plain :disabled="busy">编辑<i class="el-icon-arrow-down el-icon--right" /></el-button>
+            <el-button type="primary" plain :disabled="busy">操作<i class="el-icon-arrow-down el-icon--right" /></el-button>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item v-if="record.can_edit || record.can_transfer_owner" command="edit">编辑资料</el-dropdown-item>
               <el-dropdown-item v-if="record.can_restore" command="restore">恢复归档</el-dropdown-item>
@@ -38,7 +38,7 @@
               <el-table-column prop="description" label="说明" min-width="220" show-overflow-tooltip />
               <el-table-column v-if="project.can_sort" label="排序" width="100" align="center"><template slot-scope="{ $index }"><el-button type="text" icon="el-icon-top" :disabled="busy || $index === 0" @click="move($index, -1)" /><el-button type="text" icon="el-icon-bottom" :disabled="busy || $index === children.length - 1" @click="move($index, 1)" /></template></el-table-column>
               <el-table-column label="操作" width="120" align="center"><template slot-scope="{row}">
-                <el-dropdown trigger="click" @command="command($event, row, true)"><el-button type="primary" plain size="mini" :disabled="busy">编辑<i class="el-icon-arrow-down el-icon--right" /></el-button>
+                <el-dropdown trigger="click" @command="command($event, row, true)"><el-button type="primary" plain size="mini" :disabled="busy">操作<i class="el-icon-arrow-down el-icon--right" /></el-button>
                   <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item command="view">SOP任务</el-dropdown-item>
                     <el-dropdown-item v-if="row.can_edit || row.can_transfer_owner" command="edit">编辑资料</el-dropdown-item>
@@ -52,6 +52,7 @@
             </el-table>
           </section>
         </el-tab-pane>
+        <el-tab-pane v-if="!isSub" label="关联工位" name="stations"><project-stations v-if="activeTab === 'stations'" :project="project" @changed="load" /></el-tab-pane>
         <el-tab-pane v-if="!isSub" label="项目成员" name="members"><project-members v-if="activeTab === 'members'" :project="project" @changed="load" /></el-tab-pane>
         <el-tab-pane v-if="!isSub" label="操作记录" name="activity"><project-activity v-if="activeTab === 'activity'" :project="project" /></el-tab-pane>
         <el-tab-pane v-if="isSub" label="SOP任务" name="tasks"><sop-tasks v-if="activeTab === 'tasks'" :project-id="projectId" :subproject-id="$route.params.subprojectId" /></el-tab-pane>

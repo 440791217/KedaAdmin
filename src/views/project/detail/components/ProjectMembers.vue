@@ -16,7 +16,7 @@
       <el-table-column prop="owned_subprojects" label="负责子项目" width="110" align="center" />
       <el-table-column label="成员状态" width="100"><template slot-scope="{row}">{{ row.member_status === 1 ? '有效' : '已移除' }}</template></el-table-column>
       <el-table-column v-if="project.can_manage_members" label="操作" width="130" align="center"><template slot-scope="{row}">
-        <el-dropdown v-if="row.can_change || row.can_remove" trigger="click" @command="command($event, row)"><el-button type="primary" plain size="mini" :disabled="busy">编辑<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu slot="dropdown"><el-dropdown-item v-if="row.can_change" command="access">修改权限</el-dropdown-item><el-dropdown-item v-if="row.can_remove" command="remove"><span class="project-danger">移除成员</span></el-dropdown-item></el-dropdown-menu></el-dropdown>
+        <el-dropdown v-if="row.can_change || row.can_remove" trigger="click" @command="command($event, row)"><el-button type="primary" plain size="mini" :disabled="busy">操作<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu slot="dropdown"><el-dropdown-item v-if="row.can_change" command="access">修改权限</el-dropdown-item><el-dropdown-item v-if="row.can_remove" command="remove"><span class="project-danger">移除成员</span></el-dropdown-item></el-dropdown-menu></el-dropdown>
         <span v-else class="project-hint">{{ row.member_status === 0 ? '可重新添加' : '需先交接负责人' }}</span>
       </template></el-table-column>
     </el-table>

@@ -197,8 +197,12 @@ export const constantRoutes = [
     component: Layout,
     alwaysShow: true,
     redirect: '/system/appearance',
-    meta: { title: '系统设置' },
-    children: [{ path: 'appearance', component: () => import('@/views/system/appearance/index'), name: 'AppearanceSettings', meta: { title: '页面设置', noCache: true }}]
+    meta: { title: '系统配置' },
+    children: [
+      { path: 'appearance', component: () => import('@/views/system/appearance/index'), name: 'AppearanceSettings', meta: { title: '页面设置', noCache: true }},
+      { path: 'device', component: () => import('@/views/system/device/index'), name: 'DeviceSettings', meta: { title: '设备配置', noCache: true }},
+      { path: 'network', component: () => import('@/views/system/network/index'), name: 'NetworkSettings', meta: { title: '网络配置', noCache: true }}
+    ]
   }
   // {
   //   path: '/documentation',

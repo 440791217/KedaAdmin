@@ -33,8 +33,8 @@
       label="任务内容"
       min-width="180"
     ><template slot-scope="{ row }">{{
-      row.content_draft_id ? "有草稿" : row.revision_id ? "已发布 · V" + row.revision_no : "尚未编写"
-    }}</template></el-table-column><el-table-column
+      row.revision_id ? "当前生效：V" + row.revision_no : "尚未发布"
+    }}<span v-if="row.content_draft_id"> ｜ {{ row.content_draft_no ? '编辑草稿：V' + row.content_draft_no : '有未发布草稿' }}</span></template></el-table-column><el-table-column
       prop="owner_name"
       label="负责人"
       width="100"
@@ -54,21 +54,7 @@
       width="110"
     ><template
       slot-scope="{ row }"
-    ><el-dropdown
-      trigger="click"
-      @command="command($event, row)"
-    ><el-button
-      type="primary"
-      plain
-      size="mini"
-      :disabled="busy"
-    >编辑<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
-      slot="dropdown"
-    ><el-dropdown-item command="view">查看</el-dropdown-item><el-dropdown-item v-if="canManage && row.status !== 2" command="edit">编辑内容</el-dropdown-item><el-dropdown-item
-      v-if="canManage && row.status !== 2"
-      command="cancel"
-      divided
-    >取消任务</el-dropdown-item><el-dropdown-item v-if="canDelete" command="delete" divided><span class="task-danger">删除任务</span></el-dropdown-item></el-dropdown-menu></el-dropdown></template></el-table-column></el-table>
+    ><el-dropdown trigger="click" @command="command($event, row)"><el-button type="primary" plain size="mini" :disabled="busy">操作<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu slot="dropdown"><el-dropdown-item command="open">打开任务</el-dropdown-item><el-dropdown-item v-if="canManage && row.status !== 2" command="cancel" divided>取消任务</el-dropdown-item><el-dropdown-item v-if="canDelete" command="delete" divided><span class="task-danger">删除任务</span></el-dropdown-item></el-dropdown-menu></el-dropdown></template></el-table-column></el-table>
   </div>
 </template>
 <script src="../js/sop_tasks.js" />

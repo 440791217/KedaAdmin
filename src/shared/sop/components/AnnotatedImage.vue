@@ -10,7 +10,7 @@
       @loaded="imageLoaded"
     />
     <div v-else-if="failed">图片加载失败 <el-button type="text" @click="load">重试</el-button></div>
-    <div v-if="visual && visual.detection_regions.length" class="sop-note">
+    <div v-if="showDetection && visual && visual.detection_regions.length" class="sop-note">
       虚线框为检测区域配置，未执行识别。
       <details><summary>查看检测区域参数（{{ visual.detection_regions.length }}项）</summary>
         <p v-for="region in visual.detection_regions" :key="region.id">
@@ -32,7 +32,7 @@ export default {
   name: 'AnnotatedImage',
   components: { VisualCanvas },
   extends: image,
-  props: { visual: { type: Object, default: null }},
+  props: { visual: { type: Object, default: null }, showDetection: { type: Boolean, default: true }},
   data() {
     return { dimensions: { width: 1000, height: 600 }}
   },
@@ -44,7 +44,7 @@ export default {
       return this.visual ? this.visual.image_height : this.dimensions.height
     },
     items() {
-      return this.visual ? [...this.visual.guide_items, ...this.visual.detection_regions] : []
+      return this.visual ? [...this.visual.guide_items, ...(this.showDetection ? this.visual.detection_regions : [])] : []
     }
   },
   methods: {

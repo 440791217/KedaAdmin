@@ -51,7 +51,7 @@
         plain
         size="mini"
         :disabled="busy"
-      >编辑<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
+      >操作<i class="el-icon-arrow-down el-icon--right" /></el-button><el-dropdown-menu
         slot="dropdown"
       ><el-dropdown-item command="view">资料 / 版本</el-dropdown-item><el-dropdown-item
         v-if="row.can_delete"

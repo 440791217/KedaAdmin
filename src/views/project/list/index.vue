@@ -18,7 +18,7 @@
       <el-table-column label="状态" width="100" align="center"><template slot-scope="{row}"><el-tag :type="statusTypes[row.status]">{{ statusLabels[row.status] }}</el-tag></template></el-table-column>
       <el-table-column label="创建时间" width="160"><template slot-scope="{row}">{{ row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</template></el-table-column>
       <el-table-column label="操作" width="130" align="center" fixed="right"><template slot-scope="{row}">
-        <el-dropdown trigger="click" :disabled="busy" @command="command($event, row)"><el-button type="primary" plain size="mini" :disabled="busy">编辑<i class="el-icon-arrow-down el-icon--right" /></el-button>
+        <el-dropdown trigger="click" :disabled="busy" @command="command($event, row)"><el-button type="primary" plain size="mini" :disabled="busy">操作<i class="el-icon-arrow-down el-icon--right" /></el-button>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="view">子项目</el-dropdown-item>
             <el-dropdown-item v-if="row.can_edit || row.can_transfer_owner" command="edit">编辑资料</el-dropdown-item>

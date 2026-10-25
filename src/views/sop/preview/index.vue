@@ -34,7 +34,7 @@
         <p v-if="step.expected_duration_seconds != null" class="sop-note">
           参考时长：{{ step.expected_duration_seconds }} 秒
         </p>
-        <p class="sop-note">检测等待：{{ step.detection_wait_seconds || 0 }} 秒</p><p v-if="step.voice_enabled === 1" class="sop-text">语音提示：{{ step.voice_text }}</p>
+        <p v-if="step.voice_enabled === 1" class="sop-text">语音提示：{{ step.voice_text }}</p>
         <p v-if="step.workplace_requirements" class="sop-text">环境要求：{{ step.workplace_requirements }}</p><p v-for="req in step.resource_requirements" :key="req.model_id" class="sop-text">{{ req.name }} · {{ req.specification }} × {{ req.quantity }} {{ req.unit }}；{{ req.description }}</p>
         <annotated-image
           v-for="image in step.attachments"
